@@ -1,1 +1,1 @@
-# COMP2522_Game
+# COMP-2522-202330-Term-Project-GYGame
