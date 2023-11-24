@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/11" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.game.GameController">
+<HBox fx:id="myBox" prefWidth="200" prefHeight="150" style="-fx-background-repeat: no-repeat;-fx-background-size: cover;-fx-background-position: center;">
+    <HBox prefWidth="300" prefHeight="500">
+        <Text text="Score:170" style="-fx-font-size: 20px;"/>
+    </HBox>
+</HBox>
+</AnchorPane>
+
