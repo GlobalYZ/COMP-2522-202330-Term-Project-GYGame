@@ -3,8 +3,6 @@ import javafx.scene.canvas.GraphicsContext;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
-
 import static com.example.game.GameManager.TILE_SIZE;
 
 public class Mino {
@@ -47,10 +45,11 @@ public class Mino {
     public void move(final Direction direction) {
         move(direction.getX(), direction.getY());
     }
-    public void drawInvisibleRect(final GraphicsContext gc) {
-        // should we draw image here?
+
+    public void draw(final GraphicsContext gc) {
+        //render image based on the tag
         pieces.forEach(pc -> {
-            gc.fillRect(pc.getX() * TILE_SIZE, pc.getY() * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+            gc.drawImage(pc.getTag().getImage(), pc.getX() * TILE_SIZE, pc.getY() * TILE_SIZE, TILE_SIZE, TILE_SIZE);
         });
     }
     public void rotateBack() {
@@ -65,11 +64,14 @@ public class Mino {
             pc.setDirection(pc.getDirection().next());
         });
     }
-    public void detach(final int xOnPane, final int yOnPane) {
-        pieces.removeIf(pc -> pc.getX() == xOnPane && pc.getY() == yOnPane);
+    public void detach(final int xOnBoard, final int yOnBoard) {
+        pieces.removeIf(pc -> pc.getX() == xOnBoard && pc.getY() == yOnBoard);
     }
     public Mino copy() {
-        return new Mino(pieces.stream().map(Piece::copy).toList().toArray(Piece[]::new));
+        return new Mino(pieces.stream()
+                .map(Piece::copy)
+                .toList()
+                .toArray(new Piece[0]));
     }
 
 }
