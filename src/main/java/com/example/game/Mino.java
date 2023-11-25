@@ -47,9 +47,9 @@ public class Mino {
     }
 
     public void draw(final GraphicsContext gc) {
-        //draw image based on the tag --> to be continued
+        //render image based on the tag
         pieces.forEach(pc -> {
-            gc.fillRect(pc.getX() * TILE_SIZE, pc.getY() * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+            gc.drawImage(pc.getTag().getImage(), pc.getX() * TILE_SIZE, pc.getY() * TILE_SIZE, TILE_SIZE, TILE_SIZE);
         });
     }
     public void rotateBack() {
