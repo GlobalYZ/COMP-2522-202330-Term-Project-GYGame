@@ -16,6 +16,7 @@ import javafx.fxml.FXML;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import javafx.scene.Parent;
 import javafx.scene.image.ImageView;
@@ -34,8 +35,8 @@ public class GameManager extends Application {
     private final int[][] grid = new int[GRID_WIDTH][GRID_HEIGHT];
     // Do you want this Muyang? I've set it up for you to deal with collision detection.
 
-    private final List<Mino> original = new ArrayList<>();
-    private final List<Mino> minos = new ArrayList<>();
+    private final List<Mino> original = new ArrayList<>();  // initial minos
+    private final List<Mino> minos = new ArrayList<>();  // minos on the board
     private Mino selected; // using user input to move this mino
 
     public static final String boxStyle = "-fx-background-color: #fee3c5;-fx-border-color: #000000;-fx-border-width: 2px;";
@@ -128,7 +129,11 @@ public class GameManager extends Application {
     }
 
     private void spawn() {
-        //spawn minos
+        Mino mino = original.get(new Random().nextInt(original.size())).copy();
+        mino.move(GRID_WIDTH / 2, 0);
+        selected = mino;
+        minos.add(mino);
+        // to be continued.
     }
     public void lunchPlayBoard(Stage stage) throws IOException {
 
