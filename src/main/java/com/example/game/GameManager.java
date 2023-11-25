@@ -36,6 +36,8 @@ public class GameManager extends Application {
 
     private Integer scoreAchieved = 0;
 
+    private Integer comboCount = 0;
+
     private Integer level = 1;
 
     public static final int TILE_SIZE = 40; // Grace's constant don't delete it.
@@ -105,6 +107,16 @@ public class GameManager extends Application {
         gc.clearRect(0, 0, GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE);
         minos.forEach(mino -> mino.draw(gc));
     }
+
+    private void calculateScore(Piece piece) {
+        if (comboCount > 0) {
+            scoreNum += 10 * comboCount;
+        } else {
+            scoreNum += 10;
+        }
+    }
+
+
 
     private void generateBasicMinos() {
         //0
