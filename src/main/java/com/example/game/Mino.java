@@ -64,8 +64,8 @@ public class Mino {
             pc.setDirection(pc.getDirection().next());
         });
     }
-    public void detach(final int xOnPane, final int yOnPane) {
-        pieces.removeIf(pc -> pc.getX() == xOnPane && pc.getY() == yOnPane);
+    public void detach(final int xOnBoard, final int yOnBoard) {
+        pieces.removeIf(pc -> pc.getX() == xOnBoard && pc.getY() == yOnBoard);
     }
     public Mino copy() {
         return new Mino(pieces.stream()
