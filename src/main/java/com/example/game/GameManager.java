@@ -28,12 +28,24 @@ import javafx.scene.text.Text;
 
 public class GameManager extends Application {
     private double time;
+
+    public GraphicsContext gc;
+
+
+    private Integer scoreNum = 0;
+
+    private Integer scoreAchieved = 0;
+
+    private Integer comboCount = 0;
+
+    private Integer level = 1;
+
     public static final int TILE_SIZE = 40; // Grace's constant don't delete it.
     public static final int GRID_WIDTH = 10;
     public static final int GRID_HEIGHT = 14;
-    private GraphicsContext gc;
+
     private final int[][] grid = new int[GRID_WIDTH][GRID_HEIGHT];
-    // Do you want this Muyang? I've set it up for you to deal with collision detection.
+
 
     private final List<Mino> original = new ArrayList<>();  // initial minos
     private final List<Mino> minos = new ArrayList<>();  // minos on the board
@@ -41,9 +53,6 @@ public class GameManager extends Application {
 
     public static final String boxStyle = "-fx-background-color: #fee3c5;-fx-border-color: #000000;-fx-border-width: 2px;";
 
-    public Integer scoreNum = 0;
-
-    private Integer level = 1;
 
 
     @FXML
@@ -85,7 +94,7 @@ public class GameManager extends Application {
             public void handle(long now) {
                 time += 0.03;
                 if(time >= 0.5) {
-//                    render();
+                    render();
                     time = 0;
                 }
             }
@@ -93,6 +102,21 @@ public class GameManager extends Application {
         timer.start();
         return root;
     }
+
+    private void render() {
+        gc.clearRect(0, 0, GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE);
+        minos.forEach(mino -> mino.draw(gc));
+    }
+
+    private void calculateScore(Piece piece) {
+        if (comboCount > 0) {
+            scoreNum += 10 * comboCount;
+        } else {
+            scoreNum += 10;
+        }
+    }
+
+
 
     private void generateBasicMinos() {
         //0
@@ -134,7 +158,23 @@ public class GameManager extends Application {
         selected = mino;
         minos.add(mino);
         // to be continued.
+        for (Piece piece : mino.getPieces()) {
+            placePiece(piece);
+        }
     }
+
+    public void placePiece(final Piece piece) {
+        grid[piece.getX()][piece.getY()]++;
+    }
+
+    public void removePiece(final Piece piece) {
+        grid[piece.getX()][piece.getY()] = 0;
+    }
+
+    private boolean isOffBoard(final Piece piece) {
+        return piece.getX() < 0 || piece.getX() >= GRID_WIDTH || piece.getY() < 0 || piece.getY() >= GRID_HEIGHT;
+    }
+
     public void lunchPlayBoard(Stage stage) throws IOException {
 
         
@@ -151,6 +191,7 @@ public class GameManager extends Application {
         Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
         double screenWidth = screenBounds.getWidth();
         double screenHeight = screenBounds.getHeight();
+        double gamePadding = (screenHeight - 670) / 2;
 
         // Create an ImageView and set an image
         Image image = new Image("file:./src/asset/Image/background.jpg");
@@ -163,7 +204,7 @@ public class GameManager extends Application {
 
         FlowPane gameBoard = new FlowPane();
         gameBoard.setPrefWidth(600);
-        gameBoard.setPadding(new Insets(20, 0, 20, 0));
+        gameBoard.setPadding(new Insets(gamePadding, 0, gamePadding, 0));
 
         //create game board boxes
 
@@ -173,11 +214,11 @@ public class GameManager extends Application {
         scoreBox.setAlignment(Pos.CENTER);
         scoreBox.setPadding(new Insets(10, 0, 20, 0));
         Text scoreText = new Text();
-        Text scoreHolder = new Text();
-        scoreText.setText("SCORE: ");
-        scoreHolder.setText(scoreNum.toString());
+        Text achievedScore = new Text();
+        scoreText.setText("SCORE: " + scoreNum.toString() + "   ");
+        achievedScore.setText("ACHIEVED :" + scoreAchieved.toString());
         scoreBox.setStyle("-fx-color: #a88d53; -fx-font-size: 28px;-fx-text-alignment: center;");
-        scoreBox.getChildren().addAll(scoreText, scoreHolder);
+        scoreBox.getChildren().addAll(scoreText, achievedScore);
 
         //create playGround
         Parent playGround = setContent();
@@ -191,7 +232,7 @@ public class GameManager extends Application {
         previewBox.setStyle(boxStyle);
         List<Node> elements = new ArrayList<>();
         for (int i=0;i<3;i++) {
-            elements.add(generatePreviewElement("file:./src/asset/Image/battery.png"));
+            elements.add(generatePreviewElement("file:./src/asset/Image/Paper.png"));
         }
         previewBox.getChildren().addAll(elements);
 

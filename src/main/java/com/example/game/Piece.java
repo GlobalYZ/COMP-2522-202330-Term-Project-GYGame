@@ -9,7 +9,9 @@ import java.util.Random;
 public class Piece {
     private final int distance;
     private Direction direction;
+
     private final Tag tag;
+
     private Mino parent;
     private boolean isSpecial;
     private int x;
@@ -90,6 +92,7 @@ public class Piece {
     public Direction getDirection() {
         return direction;
     }
+
     public boolean isSpecial() {
         return isSpecial;
     }
