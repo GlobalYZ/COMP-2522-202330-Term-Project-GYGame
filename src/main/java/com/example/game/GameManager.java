@@ -28,15 +28,18 @@ public class GameManager extends Application {
     private double time;
 
 
+    private Integer scoreNum = 0;
+
+    private Integer scoreAchieved = 0;
+
+    private Integer level = 1;
+
     public static final int TILE_SIZE = 40; // Grace's constant don't delete it.
     public static final int GRID_WIDTH = 10;
     public static final int GRID_HEIGHT = 14;
 
     public static final String boxStyle = "-fx-background-color: #fee3c5;-fx-border-color: #000000;-fx-border-width: 2px;";
 
-    public Integer scoreNum = 0;
-
-    private Integer level = 1;
 
 
     @FXML
@@ -99,6 +102,7 @@ public class GameManager extends Application {
         Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
         double screenWidth = screenBounds.getWidth();
         double screenHeight = screenBounds.getHeight();
+        double gamePadding = (screenHeight - 670) / 2;
 
         // Create an ImageView and set an image
         Image image = new Image("file:./src/asset/Image/background.jpg");
@@ -111,7 +115,7 @@ public class GameManager extends Application {
 
         FlowPane gameBoard = new FlowPane();
         gameBoard.setPrefWidth(600);
-        gameBoard.setPadding(new Insets(20, 0, 20, 0));
+        gameBoard.setPadding(new Insets(gamePadding, 0, gamePadding, 0));
 
         //create game board boxes
 
@@ -121,11 +125,11 @@ public class GameManager extends Application {
         scoreBox.setAlignment(Pos.CENTER);
         scoreBox.setPadding(new Insets(10, 0, 20, 0));
         Text scoreText = new Text();
-        Text scoreHolder = new Text();
-        scoreText.setText("SCORE: ");
-        scoreHolder.setText(scoreNum.toString());
+        Text achievedScore = new Text();
+        scoreText.setText("SCORE: " + scoreNum.toString() + "   ");
+        achievedScore.setText("ACHIEVED :" + scoreAchieved.toString());
         scoreBox.setStyle("-fx-color: #a88d53; -fx-font-size: 28px;-fx-text-alignment: center;");
-        scoreBox.getChildren().addAll(scoreText, scoreHolder);
+        scoreBox.getChildren().addAll(scoreText, achievedScore);
 
         //create playGround
         Parent playGround = setContent();
@@ -139,7 +143,7 @@ public class GameManager extends Application {
         previewBox.setStyle(boxStyle);
         List<Node> elements = new ArrayList<>();
         for (int i=0;i<3;i++) {
-            elements.add(generatePreviewElement("file:./src/asset/Image/battery.png"));
+            elements.add(generatePreviewElement("file:./src/asset/Image/Paper.png"));
         }
         previewBox.getChildren().addAll(elements);
 
