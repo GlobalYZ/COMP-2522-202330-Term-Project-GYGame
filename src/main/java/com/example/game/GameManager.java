@@ -29,7 +29,6 @@ public class GameManager extends Application {
 
 
     public static final int TILE_SIZE = 40; // Grace's constant don't delete it.
-    public static final int TITRIUS_SIZE = 40;
     public static final int GRID_WIDTH = 10;
     public static final int GRID_HEIGHT = 14;
 
@@ -51,9 +50,9 @@ public class GameManager extends Application {
         Image image = new Image(path);
         ImageView imageView = new ImageView(image);
         StackPane stackPane = new StackPane();
-        stackPane.setPrefSize(TETRIUS_SIZE+10, TETRIUS_SIZE+10);
-        imageView.setFitWidth(TETRIUS_SIZE);
-        imageView.setFitHeight(TETRIUS_SIZE);
+        stackPane.setPrefSize(TILE_SIZE +10, TILE_SIZE +10);
+        imageView.setFitWidth(TILE_SIZE);
+        imageView.setFitHeight(TILE_SIZE);
         stackPane.getChildren().add(imageView);
 
         // Center the image both horizontally and vertically
@@ -63,9 +62,9 @@ public class GameManager extends Application {
 
     private Parent setContent(){
         Pane root = new Pane();
-        root.setPrefSize(GRID_WIDTH * TETRIUS_SIZE, GRID_HEIGHT * TETRIUS_SIZE);
+        root.setPrefSize(GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE);
 
-        Canvas canvas = new Canvas(GRID_WIDTH * TETRIUS_SIZE, GRID_HEIGHT * TETRIUS_SIZE);
+        Canvas canvas = new Canvas(GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE);
 
         root.getChildren().add(canvas);
         AnimationTimer timer = new AnimationTimer() {
@@ -116,7 +115,7 @@ public class GameManager extends Application {
 
         //create score box
         HBox scoreBox = new HBox();
-        scoreBox.setPrefWidth(TETRIUS_SIZE * GRID_WIDTH);
+        scoreBox.setPrefWidth(TILE_SIZE * GRID_WIDTH);
         scoreBox.setAlignment(Pos.CENTER);
         scoreBox.setPadding(new Insets(10, 0, 20, 0));
         Text scoreText = new Text();
@@ -134,7 +133,7 @@ public class GameManager extends Application {
 
         VBox previewBox = new VBox();
 
-        previewBox.setPrefWidth(TETRIUS_SIZE + 10);
+        previewBox.setPrefWidth(TILE_SIZE + 10);
         previewBox.setStyle(boxStyle);
         List<Node> elements = new ArrayList<>();
         for (int i=0;i<3;i++) {
@@ -143,7 +142,7 @@ public class GameManager extends Application {
         previewBox.getChildren().addAll(elements);
 
         // Set the minimum height to ensure it's respected
-        previewBox.setMaxHeight(3 * (TETRIUS_SIZE + 10));
+        previewBox.setMaxHeight(3 * (TILE_SIZE + 10));
 
         
 
