@@ -1,11 +1,8 @@
 package com.example.game;
-
 import javafx.scene.canvas.GraphicsContext;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import static com.example.game.GameManager.TILE_SIZE;
 
 public class Mino {

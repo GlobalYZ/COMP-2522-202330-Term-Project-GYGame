@@ -7,6 +7,7 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.*;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
@@ -26,11 +27,16 @@ import javafx.scene.text.Text;
 
 public class GameManager extends Application {
     private double time;
-
-
     public static final int TILE_SIZE = 40; // Grace's constant don't delete it.
     public static final int GRID_WIDTH = 10;
     public static final int GRID_HEIGHT = 14;
+    private GraphicsContext gc;
+    private final int[][] grid = new int[GRID_WIDTH][GRID_HEIGHT];
+    // Do you want this Muyang? I've set it up for you to deal with collision detection.
+
+    private final List<Mino> original = new ArrayList<>();
+    private final List<Mino> minos = new ArrayList<>();
+    private Mino selected; // using user input to move this mino
 
     public static final String boxStyle = "-fx-background-color: #fee3c5;-fx-border-color: #000000;-fx-border-width: 2px;";
 
@@ -67,8 +73,12 @@ public class GameManager extends Application {
         root.setPrefSize(GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE);
 
         Canvas canvas = new Canvas(GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE);
-
+        gc = canvas.getGraphicsContext2D();
         root.getChildren().add(canvas);
+
+        generateBasicMinos();
+        spawn();
+
         AnimationTimer timer = new AnimationTimer() {
             @Override
             public void handle(long now) {
@@ -83,6 +93,43 @@ public class GameManager extends Application {
         return root;
     }
 
+    private void generateBasicMinos() {
+        //0
+        original.add(new Mino(new Piece(0, Direction.DOWN)));
+        //0
+        //1
+        original.add(new Mino(
+                new Piece(0, Direction.DOWN),
+                new Piece(1, Direction.DOWN)));
+        //0 1
+        //1
+        original.add(new Mino(
+                new Piece(0, Direction.DOWN),
+                new Piece(1, Direction.RIGHT),
+                new Piece(1, Direction.DOWN)));
+        //1
+        //0
+        //1
+        original.add(new Mino(
+                new Piece(0, Direction.DOWN),
+                new Piece(1, Direction.UP),
+                new Piece(1, Direction.DOWN)));
+        //  1
+        //1 0 1
+        //  1
+        original.add(new Mino(
+                new Piece(0, Direction.DOWN),
+                new Piece(1, Direction.UP),
+                new Piece(1, Direction.LEFT),
+                new Piece(1, Direction.RIGHT),
+                new Piece(1, Direction.DOWN)));
+        // other two Minos needs a list of Direction for the position
+        // Will adjust the code after testing the basic minos
+    }
+
+    private void spawn() {
+        //spawn minos
+    }
     public void lunchPlayBoard(Stage stage) throws IOException {
 
         

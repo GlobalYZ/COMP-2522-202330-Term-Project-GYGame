@@ -2,6 +2,8 @@ package com.example.game;
 
 import javafx.scene.image.Image;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class Piece {
@@ -21,11 +23,10 @@ public class Piece {
         Glass,
         Battery,
         Booster,
-        Recycling
     }
 
     /**
-     * Nested class Tag.
+     * Tag.
      */
     public static final class Tag {
         private final Image image;
@@ -34,9 +35,16 @@ public class Piece {
          * Constructs an object of type Tag.
          */
         public Tag() {
+            List<RecycleType> recycleTypes = new ArrayList<>();
+            // chance of getting booster is 1/16
+            for (RecycleType t : RecycleType.values()) {
+                int count = t == RecycleType.Booster ? 1 : 4;
+                for (int i = 0; i < count; i++) {
+                    recycleTypes.add(t);
+                }
+            }
             Random random = new Random();
-            RecycleType[] recycleTypes = RecycleType.values();
-            type = recycleTypes[random.nextInt(recycleTypes.length)];
+            type = recycleTypes.get(random.nextInt(recycleTypes.size()));
             image = new Image("file:./src/asset/Image/" + type + ".png");
         }
         public RecycleType getType() {
@@ -68,6 +76,12 @@ public class Piece {
     public Tag getTag() {
         return tag;
     }
+
+    public void setParent(final Mino parent) {
+        this.parent = parent;
+        x = parent.getX() + distance * direction.getX();
+        y = parent.getY() + distance * direction.getY();
+    }
     public void setDirection(final Direction direction) {
         this.direction = direction;
         x = parent.getX() + distance * direction.getX();
@@ -75,11 +89,6 @@ public class Piece {
     }
     public Direction getDirection() {
         return direction;
-    }
-    public void setParent(final Mino parent) {
-        this.parent = parent;
-        x = parent.getX() + distance * direction.getX();
-        y = parent.getY() + distance * direction.getY();
     }
     public boolean isSpecial() {
         return isSpecial;
