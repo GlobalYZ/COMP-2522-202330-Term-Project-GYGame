@@ -29,6 +29,8 @@ import javafx.scene.text.Text;
 public class GameManager extends Application {
     private double time;
 
+    public GraphicsContext gc;
+
 
     private Integer scoreNum = 0;
 
@@ -39,7 +41,7 @@ public class GameManager extends Application {
     public static final int TILE_SIZE = 40; // Grace's constant don't delete it.
     public static final int GRID_WIDTH = 10;
     public static final int GRID_HEIGHT = 14;
-    private GraphicsContext gc;
+
     private final int[][] grid = new int[GRID_WIDTH][GRID_HEIGHT];
 
 
@@ -90,13 +92,18 @@ public class GameManager extends Application {
             public void handle(long now) {
                 time += 0.03;
                 if(time >= 0.5) {
-//                    render();
+                    render();
                     time = 0;
                 }
             }
         };
         timer.start();
         return root;
+    }
+
+    private void render() {
+        gc.clearRect(0, 0, GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE);
+        minos.forEach(mino -> mino.draw(gc));
     }
 
     private void generateBasicMinos() {
@@ -139,7 +146,23 @@ public class GameManager extends Application {
         selected = mino;
         minos.add(mino);
         // to be continued.
+        for (Piece piece : mino.getPieces()) {
+            placePiece(piece);
+        }
     }
+
+    public void placePiece(final Piece piece) {
+        grid[piece.getX()][piece.getY()]++;
+    }
+
+    public void removePiece(final Piece piece) {
+        grid[piece.getX()][piece.getY()] = 0;
+    }
+
+    private boolean isOffBoard(final Piece piece) {
+        return piece.getX() < 0 || piece.getX() >= GRID_WIDTH || piece.getY() < 0 || piece.getY() >= GRID_HEIGHT;
+    }
+
     public void lunchPlayBoard(Stage stage) throws IOException {
 
         
