@@ -13,6 +13,9 @@ import javafx.stage.Stage;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import javafx.scene.Parent;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
@@ -24,7 +27,7 @@ import javafx.scene.text.Text;
 public class GameManager extends Application {
     private double time;
 
-    public static final int TITRIUS_SIZE = 40;
+    public static final int TETRIUS_SIZE = 40;
     public static final int GRID_WIDTH = 10;
     public static final int GRID_HEIGHT = 14;
 
@@ -42,11 +45,25 @@ public class GameManager extends Application {
         }
     }
 
+    private Node generatePreviewElement(String path) {
+        Image image = new Image(path);
+        ImageView imageView = new ImageView(image);
+        StackPane stackPane = new StackPane();
+        stackPane.setPrefSize(TETRIUS_SIZE+10, TETRIUS_SIZE+10);
+        imageView.setFitWidth(TETRIUS_SIZE);
+        imageView.setFitHeight(TETRIUS_SIZE);
+        stackPane.getChildren().add(imageView);
+
+        // Center the image both horizontally and vertically
+        StackPane.setAlignment(imageView, Pos.CENTER);
+        return stackPane;
+    }
+
     private Parent setContent(){
         Pane root = new Pane();
-        root.setPrefSize(GRID_WIDTH * TITRIUS_SIZE, GRID_HEIGHT * TITRIUS_SIZE);
+        root.setPrefSize(GRID_WIDTH * TETRIUS_SIZE, GRID_HEIGHT * TETRIUS_SIZE);
 
-        Canvas canvas = new Canvas(GRID_WIDTH * TITRIUS_SIZE, GRID_HEIGHT * TITRIUS_SIZE);
+        Canvas canvas = new Canvas(GRID_WIDTH * TETRIUS_SIZE, GRID_HEIGHT * TETRIUS_SIZE);
 
         root.getChildren().add(canvas);
         AnimationTimer timer = new AnimationTimer() {
@@ -97,7 +114,7 @@ public class GameManager extends Application {
 
         //create score box
         HBox scoreBox = new HBox();
-        scoreBox.setPrefWidth(TITRIUS_SIZE * GRID_WIDTH);
+        scoreBox.setPrefWidth(TETRIUS_SIZE * GRID_WIDTH);
         scoreBox.setAlignment(Pos.CENTER);
         scoreBox.setPadding(new Insets(10, 0, 20, 0));
         Text scoreText = new Text();
@@ -111,9 +128,26 @@ public class GameManager extends Application {
         Parent playGround = setContent();
         playGround.setStyle(boxStyle);
 
+        //create preview box and previewElements
+
+        VBox previewBox = new VBox();
+
+        previewBox.setPrefWidth(TETRIUS_SIZE + 10);
+        previewBox.setStyle(boxStyle);
+        List<Node> elements = new ArrayList<>();
+        for (int i=0;i<3;i++) {
+            elements.add(generatePreviewElement("file:./src/asset/Image/battery.png"));
+        }
+        previewBox.getChildren().addAll(elements);
+
+        // Set the minimum height to ensure it's respected
+        previewBox.setMaxHeight(3 * (TETRIUS_SIZE + 10));
+
+        
 
         //link to game board
-        gameBoard.getChildren().addAll(scoreBox, playGround);
+        gameBoard.getChildren().addAll(scoreBox, playGround, previewBox);
+        gameBoard.setMargin(previewBox, new Insets(0, 0, 40, 40));
 
         gameContainer.getChildren().add(gameBoard);
         anchorPane.getChildren().addAll(imageView, gameContainer);
