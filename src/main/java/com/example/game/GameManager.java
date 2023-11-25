@@ -2,10 +2,13 @@ package com.example.game;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -14,6 +17,7 @@ import javafx.scene.Parent;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.image.Image;
+import javafx.geometry.Pos;
 
 
 public class GameManager extends Application {
@@ -52,22 +56,40 @@ public class GameManager extends Application {
         // Cast the root node to AnchorPane (or the appropriate type)
         AnchorPane anchorPane = (AnchorPane) root;
 
-        // Create an ImageView and set an image
-        Image image = new Image("file:../../../../../asset/Image/background.jpg");
-        ImageView imageView = new ImageView(image);
-        imageView.setFitWidth(200); // Set width
-        imageView.setFitHeight(150); // Set height
 
-        // Add the ImageView to the children of the AnchorPane and position it
-        AnchorPane.setTopAnchor(imageView, 50.0); // Set top anchor
-        AnchorPane.setLeftAnchor(imageView, 50.0); // Set left anchor
+        // Create an ImageView and set an image
+        Image image = new Image("file:./src/asset/Image/background.jpg");
+        ImageView imageView = new ImageView(image);
+        imageView.fitWidthProperty().bind(anchorPane.widthProperty());
+        imageView.fitHeightProperty().bind(anchorPane.heightProperty());
+
+        HBox gameContainer = new HBox();
+
+
+        // 获取屏幕尺寸
+        Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
+        double screenWidth = screenBounds.getWidth();
+        double screenHeight = screenBounds.getHeight();
+
+        gameContainer.setPrefSize(screenWidth, screenHeight);
+
+        gameContainer.setAlignment(Pos.CENTER);
+
+//        int width = (int) imageView.getBoundsInParent().getWidth()/2 + 350;
+//        gameContainer.setStyle("-fx-padding: 300;");
+        HBox gameBoard = new HBox();
+        gameBoard.setPrefWidth(600);
+        gameBoard.setPrefHeight(400);
+        gameBoard.setStyle("-fx-background-color: #fee3c5;-fx-border-color: #000000;-fx-border-width: 2px;");
+        gameContainer.getChildren().add(gameBoard);
 
         // Add the ImageView to the children of the AnchorPane
-        anchorPane.getChildren().add(imageView);
+        anchorPane.getChildren().addAll(imageView, gameContainer);
+
 
         // Set up the stage and scene
         stage.setScene(new Scene(root));
-        stage.setMaximized(true);
+//        stage.setMaximized(true);
         stage.setTitle("EcoStack");
         stage.show();
 
