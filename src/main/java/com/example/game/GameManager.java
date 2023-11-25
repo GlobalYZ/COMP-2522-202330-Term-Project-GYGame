@@ -2,12 +2,12 @@ package com.example.game;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.layout.*;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.event.ActionEvent;
@@ -18,10 +18,19 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.image.Image;
 import javafx.geometry.Pos;
+import javafx.scene.text.Text;
 
 
 public class GameManager extends Application {
     private double time;
+
+    public static final int TITRIUS_SIZE = 40;
+    public static final int GRID_WIDTH = 10;
+    public static final int GRID_HEIGHT = 14;
+
+    public static final String boxStyle = "-fx-background-color: #fee3c5;-fx-border-color: #000000;-fx-border-width: 2px;";
+
+    public Integer scoreNum = 0;
 
 
     @FXML
@@ -33,7 +42,13 @@ public class GameManager extends Application {
         }
     }
 
-    private Parent setContent(Parent root){
+    private Parent setContent(){
+        Pane root = new Pane();
+        root.setPrefSize(GRID_WIDTH * TITRIUS_SIZE, GRID_HEIGHT * TITRIUS_SIZE);
+
+        Canvas canvas = new Canvas(GRID_WIDTH * TITRIUS_SIZE, GRID_HEIGHT * TITRIUS_SIZE);
+
+        root.getChildren().add(canvas);
         AnimationTimer timer = new AnimationTimer() {
             @Override
             public void handle(long now) {
@@ -46,22 +61,16 @@ public class GameManager extends Application {
         };
         timer.start();
         return root;
-
     }
 
     public void lunchPlayBoard(Stage stage) throws IOException {
+
+        
         FXMLLoader loader = new FXMLLoader(getClass().getResource("play-board.fxml"));
         Parent root = loader.load(); // Load the FXML file and get the root node
 
         // Cast the root node to AnchorPane (or the appropriate type)
         AnchorPane anchorPane = (AnchorPane) root;
-
-
-        // Create an ImageView and set an image
-        Image image = new Image("file:./src/asset/Image/background.jpg");
-        ImageView imageView = new ImageView(image);
-        imageView.fitWidthProperty().bind(anchorPane.widthProperty());
-        imageView.fitHeightProperty().bind(anchorPane.heightProperty());
 
         HBox gameContainer = new HBox();
 
@@ -71,19 +80,42 @@ public class GameManager extends Application {
         double screenWidth = screenBounds.getWidth();
         double screenHeight = screenBounds.getHeight();
 
-        gameContainer.setPrefSize(screenWidth, screenHeight);
+        // Create an ImageView and set an image
+        Image image = new Image("file:./src/asset/Image/background.jpg");
+        ImageView imageView = new ImageView(image);
+        imageView.fitWidthProperty().bind(anchorPane.widthProperty());
+        imageView.fitHeightProperty().bind(anchorPane.heightProperty());
 
+        gameContainer.setPrefSize(screenWidth, screenHeight);
         gameContainer.setAlignment(Pos.CENTER);
 
-//        int width = (int) imageView.getBoundsInParent().getWidth()/2 + 350;
-//        gameContainer.setStyle("-fx-padding: 300;");
-        HBox gameBoard = new HBox();
+        FlowPane gameBoard = new FlowPane();
         gameBoard.setPrefWidth(600);
-//        gameBoard.setPrefHeight(400);
-        gameBoard.setStyle("-fx-background-color: #fee3c5;-fx-border-color: #000000;-fx-border-width: 2px;");
-        gameContainer.getChildren().add(gameBoard);
+        gameBoard.setPadding(new Insets(20, 0, 20, 0));
 
-        // Add the ImageView to the children of the AnchorPane
+        //create game board boxes
+
+        //create score box
+        HBox scoreBox = new HBox();
+        scoreBox.setPrefWidth(TITRIUS_SIZE * GRID_WIDTH);
+        scoreBox.setAlignment(Pos.CENTER);
+        scoreBox.setPadding(new Insets(10, 0, 20, 0));
+        Text scoreText = new Text();
+        Text scoreHolder = new Text();
+        scoreText.setText("SCORE: ");
+        scoreHolder.setText(scoreNum.toString());
+        scoreBox.setStyle("-fx-color: #a88d53; -fx-font-size: 28px;-fx-text-alignment: center;");
+        scoreBox.getChildren().addAll(scoreText, scoreHolder);
+
+        //create playGround
+        Parent playGround = setContent();
+        playGround.setStyle(boxStyle);
+
+
+        //link to game board
+        gameBoard.getChildren().addAll(scoreBox, playGround);
+
+        gameContainer.getChildren().add(gameBoard);
         anchorPane.getChildren().addAll(imageView, gameContainer);
 
 
@@ -92,8 +124,6 @@ public class GameManager extends Application {
         stage.setMaximized(true);
         stage.setTitle("EcoStack");
         stage.show();
-
-
     }
 
     @Override
