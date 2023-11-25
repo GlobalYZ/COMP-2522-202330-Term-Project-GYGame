@@ -28,7 +28,7 @@ public class GameManager extends Application {
     private double time;
 
 
-    public static final int TILE_SIZE = 40; // Grace's constant don't delete it.
+    public static final int TETRIUS_SIZE = 40; // Grace's constant don't delete it.
 
     public static final int GRID_WIDTH = 10;
     public static final int GRID_HEIGHT = 14;
