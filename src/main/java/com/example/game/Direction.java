@@ -6,11 +6,22 @@ public enum Direction {
     DOWN(0, 1),
     LEFT(-1, 0);
 
-    int x, y;
+    private int x;
+    private int y;
 
     Direction(int x, int y) {
         this.x = x;
         this.y = y;
+    }
+
+    // Get the x value
+    public int getX() {
+        return x;
+    }
+
+    // Get the y value
+    public int getY() {
+        return y;
     }
 
     // Get the previous direction
