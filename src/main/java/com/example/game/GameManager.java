@@ -164,6 +164,9 @@ public class GameManager extends Application {
 
         //link to game board
         gameBoard.getChildren().addAll(scoreBox, playGround, rightWrapper);
+        gameBoard.setMargin(scoreBox, new Insets(0, 0, 0, 60));
+        gameBoard.setMargin(playGround, new Insets(0, 0, 0, 60));
+
 
 
         gameContainer.getChildren().add(gameBoard);
