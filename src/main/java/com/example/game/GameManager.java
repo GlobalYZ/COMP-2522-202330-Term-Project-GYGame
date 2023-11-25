@@ -79,7 +79,7 @@ public class GameManager extends Application {
 //        gameContainer.setStyle("-fx-padding: 300;");
         HBox gameBoard = new HBox();
         gameBoard.setPrefWidth(600);
-        gameBoard.setPrefHeight(400);
+//        gameBoard.setPrefHeight(400);
         gameBoard.setStyle("-fx-background-color: #fee3c5;-fx-border-color: #000000;-fx-border-width: 2px;");
         gameContainer.getChildren().add(gameBoard);
 
@@ -89,7 +89,7 @@ public class GameManager extends Application {
 
         // Set up the stage and scene
         stage.setScene(new Scene(root));
-//        stage.setMaximized(true);
+        stage.setMaximized(true);
         stage.setTitle("EcoStack");
         stage.show();
 
