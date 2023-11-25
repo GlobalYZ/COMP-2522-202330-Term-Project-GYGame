@@ -3,7 +3,7 @@ package com.example.game;
 public class Piece {
     private int distance;
     private Direction direction;
-    private Tag tag;
+//    private Tag tag;
     private Mino parent;
     private boolean isSpecial;
     private int x;
@@ -38,9 +38,9 @@ public class Piece {
         x = parent.getX() + distance * direction.getX();
         y = parent.getY() + distance * direction.getY();
     }
-    public void setTag(final Tag tag) {
-        this.tag = tag;
-    }
+//    public void setTag(final Tag tag) {
+//        this.tag = tag;
+//    }
     public boolean isSpecial() {
         return isSpecial;
     }

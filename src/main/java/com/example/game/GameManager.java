@@ -36,6 +36,8 @@ public class GameManager extends Application {
 
     public Integer scoreNum = 0;
 
+    private Integer level = 1;
+
 
     @FXML
     private void startNewGame(ActionEvent event) {
@@ -144,11 +146,25 @@ public class GameManager extends Application {
         // Set the minimum height to ensure it's respected
         previewBox.setMaxHeight(3 * (TILE_SIZE + 10));
 
-        
+        //create LvBox
+        FlowPane LvBox = new FlowPane();
+        Text LvText = new Text();
+        LvText.setText("LV" + level.toString());
+        LvText.setStyle("-fx-font-size: 20px;-fx-text-alignment: center;-fx-color: #a88d53;");
+        LvBox.setAlignment(Pos.CENTER);
+        LvBox.setMaxWidth(TILE_SIZE+10);
+        LvBox.setMinHeight(TILE_SIZE+10);
+        LvBox.setStyle(boxStyle);
+        LvBox.getChildren().add(LvText);
+
+        VBox rightWrapper = new VBox();
+        rightWrapper.getChildren().addAll(previewBox, LvBox);
+        rightWrapper.setMargin(previewBox, new Insets(0, 0, 40, 50));
+        rightWrapper.setMargin(LvBox, new Insets(10, 0, 10, 50));
 
         //link to game board
-        gameBoard.getChildren().addAll(scoreBox, playGround, previewBox);
-        gameBoard.setMargin(previewBox, new Insets(0, 0, 40, 40));
+        gameBoard.getChildren().addAll(scoreBox, playGround, rightWrapper);
+
 
         gameContainer.getChildren().add(gameBoard);
         anchorPane.getChildren().addAll(imageView, gameContainer);
