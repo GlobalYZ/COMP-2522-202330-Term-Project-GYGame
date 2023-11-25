@@ -1,9 +1,10 @@
 package com.example.game;
+
 import javafx.scene.canvas.GraphicsContext;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.example.game.GameManager.TILE_SIZE;
 
@@ -47,8 +48,9 @@ public class Mino {
     public void move(final Direction direction) {
         move(direction.getX(), direction.getY());
     }
-    public void drawInvisibleRect(final GraphicsContext gc) {
-        // should we draw image here?
+
+    public void draw(final GraphicsContext gc) {
+        //draw image based on the tag --> to be continued
         pieces.forEach(pc -> {
             gc.fillRect(pc.getX() * TILE_SIZE, pc.getY() * TILE_SIZE, TILE_SIZE, TILE_SIZE);
         });
@@ -69,7 +71,10 @@ public class Mino {
         pieces.removeIf(pc -> pc.getX() == xOnPane && pc.getY() == yOnPane);
     }
     public Mino copy() {
-        return new Mino(pieces.stream().map(Piece::copy).toList().toArray(Piece[]::new));
+        return new Mino(pieces.stream()
+                .map(Piece::copy)
+                .toList()
+                .toArray(new Piece[0]));
     }
 
 }
