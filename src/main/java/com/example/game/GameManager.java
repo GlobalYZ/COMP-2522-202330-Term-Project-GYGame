@@ -8,6 +8,7 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
@@ -111,7 +112,7 @@ public class GameManager extends Application {
             @Override
             public void handle(long now) {
                 time += 0.03;
-                if(time >= 0.5) {
+                if(time >= 0.9) {
                     update();
                     render();
                     time = 0;
@@ -234,7 +235,21 @@ public class GameManager extends Application {
         anchorPane.getChildren().addAll(imageView, gameContainer);
 
         // Set up the stage and scene
-        stage.setScene(new Scene(root));
+        Scene scene = new Scene(root);
+        scene.setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.UP) {
+                makeMove(Mino::rotate, Mino::rotateBack, false);
+            } else if (e.getCode() == KeyCode.RIGHT) {
+                makeMove(p -> p.move(Direction.RIGHT), p -> p.move(Direction.LEFT), false);
+            } else if (e.getCode() == KeyCode.LEFT) {
+                makeMove(p -> p.move(Direction.LEFT), p -> p.move(Direction.RIGHT), false);
+            } else if (e.getCode() == KeyCode.DOWN) {
+                makeMove(p -> p.move(Direction.DOWN), p -> p.move(Direction.UP), true);
+            }
+            render();
+        });
+
+        stage.setScene(scene);
         stage.setMaximized(true);
         stage.setTitle("EcoStack");
         stage.show();
