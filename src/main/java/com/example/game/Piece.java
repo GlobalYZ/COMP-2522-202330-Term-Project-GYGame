@@ -20,11 +20,18 @@ public class Piece {
      * RecycleType.
      */
     public enum RecycleType {
-        Plastic,
-        Paper,
-        Glass,
-        Battery,
-        Booster,
+        Plastic(10),
+        Paper(11),
+        Glass(12),
+        Battery(13),
+        Booster(14);
+        private final int id;
+        RecycleType(final int id) {
+            this.id = id;
+        }
+        public int tagID() {
+            return id;
+        }
     }
 
     /**
@@ -47,7 +54,7 @@ public class Piece {
             }
             Random random = new Random();
             type = recycleTypes.get(random.nextInt(recycleTypes.size()));
-            image = new Image("file:./src/asset/Image/" + type + ".png");
+            image = new Image("file:./src/asset/Image/" + type.name() + ".png");
         }
         public RecycleType getType() {
             return type;
@@ -55,11 +62,9 @@ public class Piece {
         public Image getImage() {
             return image;
         }
-
-        public String toString() {
-            return type.toString();
+        public int getID() {
+            return type.tagID();
         }
-
     }
 
     public Piece(final int distance, final Direction direction) {
