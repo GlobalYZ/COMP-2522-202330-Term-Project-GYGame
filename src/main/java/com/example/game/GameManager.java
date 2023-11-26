@@ -157,6 +157,7 @@ public class GameManager extends Application {
         if(!isValidateState()) {
             selected.getPieces().forEach(p -> removePiece(p));
             onFail.accept(selected);
+            selected.getPieces().forEach(p -> placePiece(p));
             if (endMove) {
                 checkPieces();
             }
