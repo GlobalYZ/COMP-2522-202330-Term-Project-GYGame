@@ -56,13 +56,11 @@ public class Mino {
         });
     }
     public void rotateBack() {
-        System.out.println("rotate back");
         pieces.forEach(pc -> {
             pc.setDirection(pc.getDirection().prev());
         });
     }
     public void rotate() {
-        System.out.println("rotate");
         pieces.forEach(pc -> {
             pc.setDirection(pc.getDirection().next());
         });
