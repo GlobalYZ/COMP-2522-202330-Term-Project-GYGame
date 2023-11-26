@@ -66,19 +66,17 @@ public class GameManager extends Application {
                 new Piece(0, Direction.DOWN),
                 new Piece(1, Direction.RIGHT),
                 new Piece(1, Direction.DOWN)));
-        //1
         //0
         //1
+        //2
         original.add(new Mino(
                 new Piece(0, Direction.DOWN),
-                new Piece(1, Direction.UP),
-                new Piece(1, Direction.DOWN)));
-        //  1
+                new Piece(1, Direction.DOWN),
+                new Piece(2, Direction.DOWN)));
         //1 0 1
         //  1
         original.add(new Mino(
                 new Piece(0, Direction.DOWN),
-                new Piece(1, Direction.UP),
                 new Piece(1, Direction.LEFT),
                 new Piece(1, Direction.RIGHT),
                 new Piece(1, Direction.DOWN)));
