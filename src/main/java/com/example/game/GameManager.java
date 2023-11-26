@@ -236,6 +236,7 @@ public class GameManager extends Application {
 
         // Set up the stage and scene
         Scene scene = new Scene(root);
+        // keyboard event
         scene.setOnKeyPressed(e -> {
             if (e.getCode() == KeyCode.UP) {
                 makeMove(Mino::rotate, Mino::rotateBack, false);
