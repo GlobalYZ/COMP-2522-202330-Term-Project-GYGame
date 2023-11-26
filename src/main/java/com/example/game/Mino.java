@@ -10,6 +10,7 @@ public class Mino {
     private int y;
     private final List<Piece> pieces;
 
+
     public Mino(final Piece... pieces) {
         this.pieces = new ArrayList<>(Arrays.asList(pieces));
 
@@ -46,8 +47,10 @@ public class Mino {
         move(direction.getX(), direction.getY());
     }
 
+
+
     public void draw(final GraphicsContext gc) {
-        //render image based on the tag
+
         pieces.forEach(pc -> {
             gc.drawImage(pc.getTag().getImage(), pc.getX() * TILE_SIZE, pc.getY() * TILE_SIZE, TILE_SIZE, TILE_SIZE);
         });

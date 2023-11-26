@@ -101,4 +101,6 @@ public class Piece {
         return new Piece(distance, direction);
     }
 
+
+
 }

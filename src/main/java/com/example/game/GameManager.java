@@ -17,20 +17,20 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.function.Consumer;
 
 import javafx.scene.Parent;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.image.Image;
 import javafx.geometry.Pos;
-import javafx.scene.text.Text;
+
 
 
 public class GameManager extends Application {
     private double time;
 
     public GraphicsContext gc;
-
 
     private Integer scoreNum = 0;
 
@@ -50,72 +50,6 @@ public class GameManager extends Application {
     private final List<Mino> original = new ArrayList<>();  // initial minos
     private final List<Mino> minos = new ArrayList<>();  // minos on the board
     private Mino selected; // using user input to move this mino
-
-    public static final String boxStyle = "-fx-background-color: #fee3c5;-fx-border-color: #000000;-fx-border-width: 2px;";
-
-
-
-    @FXML
-    private void startNewGame(ActionEvent event) {
-        try {
-            lunchPlayBoard((Stage) ((Node) event.getSource()).getScene().getWindow());
-        } catch (IOException e) {
-            e.printStackTrace(); // Handle the IOException appropriately
-        }
-    }
-
-    private Node generatePreviewElement(String path) {
-        Image image = new Image(path);
-        ImageView imageView = new ImageView(image);
-        StackPane stackPane = new StackPane();
-        stackPane.setPrefSize(TILE_SIZE +10, TILE_SIZE +10);
-        imageView.setFitWidth(TILE_SIZE);
-        imageView.setFitHeight(TILE_SIZE);
-        stackPane.getChildren().add(imageView);
-
-        // Center the image both horizontally and vertically
-        StackPane.setAlignment(imageView, Pos.CENTER);
-        return stackPane;
-    }
-
-    private Parent setContent(){
-        Pane root = new Pane();
-        root.setPrefSize(GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE);
-
-        Canvas canvas = new Canvas(GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE);
-        gc = canvas.getGraphicsContext2D();
-        root.getChildren().add(canvas);
-
-        generateBasicMinos();
-        spawn();
-
-        AnimationTimer timer = new AnimationTimer() {
-            @Override
-            public void handle(long now) {
-                time += 0.03;
-                if(time >= 0.5) {
-                    render();
-                    time = 0;
-                }
-            }
-        };
-        timer.start();
-        return root;
-    }
-
-    private void render() {
-        gc.clearRect(0, 0, GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE);
-        minos.forEach(mino -> mino.draw(gc));
-    }
-
-    private void calculateScore(Piece piece) {
-        if (comboCount > 0) {
-            scoreNum += 10 * comboCount;
-        } else {
-            scoreNum += 10;
-        }
-    }
-
 
 
     private void generateBasicMinos() {
@@ -152,6 +86,77 @@ public class GameManager extends Application {
         // Will adjust the code after testing the basic minos
     }
 
+
+    @FXML
+    private void startNewGame(ActionEvent event) {
+        try {
+            lunchPlayBoard((Stage) ((Node) event.getSource()).getScene().getWindow());
+        } catch (IOException e) {
+            e.printStackTrace(); // Handle the IOException appropriately
+        }
+    }
+
+
+
+    private Parent setContent(){
+        Pane root = new Pane();
+        root.setPrefSize(GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE);
+
+        Canvas canvas = new Canvas(GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE);
+        gc = canvas.getGraphicsContext2D();
+        root.getChildren().add(canvas);
+
+        generateBasicMinos();
+        spawn();
+
+        AnimationTimer timer = new AnimationTimer() {
+            @Override
+            public void handle(long now) {
+                time += 0.03;
+                if(time >= 0.5) {
+                    update();
+                    render();
+                    time = 0;
+                }
+            }
+        };
+        timer.start();
+        return root;
+    }
+
+    private void update() {
+        makeMove(p -> p.move(Direction.DOWN), p -> p.move(Direction.UP), true);
+    }
+
+    private void makeMove(Consumer<Mino> onSuccess, Consumer<Mino> onFail, boolean endMove) {
+        selected.move(Direction.DOWN);
+        onSuccess.accept(selected);
+        boolean offBoard = selected.getPieces().stream().anyMatch(this::isOffBoard);
+        if(!offBoard) {
+            selected.getPieces().forEach(p -> placePiece(p));
+        } else {
+            onFail.accept(selected);
+            selected.getPieces().forEach(p -> placePiece(p));
+        }
+        if (endMove) {
+            System.out.println("end move");
+        }
+    }
+
+    private void render() {
+        gc.clearRect(0, 0, GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE);
+        minos.forEach(mino -> mino.draw(gc));
+    }
+
+    private void calculateScore(Piece piece) {
+        if (comboCount > 0) {
+            scoreNum += 10 * comboCount;
+        } else {
+            scoreNum += 10;
+        }
+    }
+
+
     private void spawn() {
         Mino mino = original.get(new Random().nextInt(original.size())).copy();
         mino.move(GRID_WIDTH / 2, 0);
@@ -176,8 +181,6 @@ public class GameManager extends Application {
     }
 
     public void lunchPlayBoard(Stage stage) throws IOException {
-
-        
         FXMLLoader loader = new FXMLLoader(getClass().getResource("play-board.fxml"));
         Parent root = loader.load(); // Load the FXML file and get the root node
 
@@ -186,8 +189,7 @@ public class GameManager extends Application {
 
         HBox gameContainer = new HBox();
 
-
-        // 获取屏幕尺寸
+        // get user screen size
         Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
         double screenWidth = screenBounds.getWidth();
         double screenHeight = screenBounds.getHeight();
@@ -202,53 +204,23 @@ public class GameManager extends Application {
         gameContainer.setPrefSize(screenWidth, screenHeight);
         gameContainer.setAlignment(Pos.CENTER);
 
+        //create game board boxes
         FlowPane gameBoard = new FlowPane();
         gameBoard.setPrefWidth(600);
         gameBoard.setPadding(new Insets(gamePadding, 0, gamePadding, 0));
 
-        //create game board boxes
-
         //create score box
-        HBox scoreBox = new HBox();
-        scoreBox.setPrefWidth(TILE_SIZE * GRID_WIDTH);
-        scoreBox.setAlignment(Pos.CENTER);
-        scoreBox.setPadding(new Insets(10, 0, 20, 0));
-        Text scoreText = new Text();
-        Text achievedScore = new Text();
-        scoreText.setText("SCORE: " + scoreNum.toString() + "   ");
-        achievedScore.setText("ACHIEVED :" + scoreAchieved.toString());
-        scoreBox.setStyle("-fx-color: #a88d53; -fx-font-size: 28px;-fx-text-alignment: center;");
-        scoreBox.getChildren().addAll(scoreText, achievedScore);
+        Node scoreBox = GameUIHelper.createScoreBoard(scoreNum, scoreAchieved);
 
         //create playGround
         Parent playGround = setContent();
-        playGround.setStyle(boxStyle);
+        playGround.setStyle(GameUIHelper.boxStyle);
 
         //create preview box and previewElements
-
-        VBox previewBox = new VBox();
-
-        previewBox.setPrefWidth(TILE_SIZE + 10);
-        previewBox.setStyle(boxStyle);
-        List<Node> elements = new ArrayList<>();
-        for (int i=0;i<3;i++) {
-            elements.add(generatePreviewElement("file:./src/asset/Image/Paper.png"));
-        }
-        previewBox.getChildren().addAll(elements);
-
-        // Set the minimum height to ensure it's respected
-        previewBox.setMaxHeight(3 * (TILE_SIZE + 10));
+        Node previewBox = GameUIHelper.createPreviewBox();
 
         //create LvBox
-        FlowPane LvBox = new FlowPane();
-        Text LvText = new Text();
-        LvText.setText("LV" + level.toString());
-        LvText.setStyle("-fx-font-size: 20px;-fx-text-alignment: center;-fx-color: #a88d53;");
-        LvBox.setAlignment(Pos.CENTER);
-        LvBox.setMaxWidth(TILE_SIZE+10);
-        LvBox.setMinHeight(TILE_SIZE+10);
-        LvBox.setStyle(boxStyle);
-        LvBox.getChildren().add(LvText);
+        Node LvBox = GameUIHelper.createLvBox(level);
 
         VBox rightWrapper = new VBox();
         rightWrapper.getChildren().addAll(previewBox, LvBox);
@@ -260,11 +232,8 @@ public class GameManager extends Application {
         gameBoard.setMargin(scoreBox, new Insets(0, 0, 0, 60));
         gameBoard.setMargin(playGround, new Insets(0, 0, 0, 60));
 
-
-
         gameContainer.getChildren().add(gameBoard);
         anchorPane.getChildren().addAll(imageView, gameContainer);
-
 
         // Set up the stage and scene
         stage.setScene(new Scene(root));
