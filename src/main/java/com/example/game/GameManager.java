@@ -54,25 +54,25 @@ public class GameManager extends Application {
 
     private void generateBasicMinos() {
         //0
-        original.add(new Mino(new Piece(0, Direction.DOWN)));
-        //0
-        //1
-        original.add(new Mino(
-                new Piece(0, Direction.DOWN),
-                new Piece(1, Direction.DOWN)));
-        //0 1
-        //1
-        original.add(new Mino(
-                new Piece(0, Direction.DOWN),
-                new Piece(1, Direction.RIGHT),
-                new Piece(1, Direction.DOWN)));
-        //1
-        //0
-        //1
-        original.add(new Mino(
-                new Piece(0, Direction.DOWN),
-                new Piece(1, Direction.UP),
-                new Piece(1, Direction.DOWN)));
+//        original.add(new Mino(new Piece(0, Direction.DOWN)));
+//        //0
+//        //1
+//        original.add(new Mino(
+//                new Piece(0, Direction.DOWN),
+//                new Piece(1, Direction.DOWN)));
+//        //0 1
+//        //1
+//        original.add(new Mino(
+//                new Piece(0, Direction.DOWN),
+//                new Piece(1, Direction.RIGHT),
+//                new Piece(1, Direction.DOWN)));
+//        //1
+//        //0
+//        //1
+//        original.add(new Mino(
+//                new Piece(0, Direction.DOWN),
+//                new Piece(1, Direction.UP),
+//                new Piece(1, Direction.DOWN)));
         //  1
         //1 0 1
         //  1
@@ -113,7 +113,7 @@ public class GameManager extends Application {
             @Override
             public void handle(long now) {
                 time += 0.03;
-                if(time >= 0.5) {
+                if(time >= 1.0) {
                     update();
                     render();
                     time = 0;
@@ -139,9 +139,13 @@ public class GameManager extends Application {
             selected.getPieces().forEach(p -> placePiece(p));
         }
         if (endMove) {
-            System.out.println("end move");
+            return;
         }
     }
+
+//    private void checkPiece(){
+//
+//    }
 
     private void render() {
         gc.clearRect(0, 0, GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE);
