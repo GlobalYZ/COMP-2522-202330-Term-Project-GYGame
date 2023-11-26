@@ -42,7 +42,7 @@ public class GameManager extends Application {
 
     public static final int TILE_SIZE = 40; // Grace's constant don't delete it.
     public static final int GRID_WIDTH = 10;
-    public static final int GRID_HEIGHT = 14;
+    public static final int GRID_HEIGHT = 16;
 
     private final int[][] grid = new int[GRID_WIDTH][GRID_HEIGHT];
 
@@ -54,31 +54,31 @@ public class GameManager extends Application {
 
     private void generateBasicMinos() {
         //0
-//        original.add(new Mino(new Piece(0, Direction.DOWN)));
-//        //0
-//        //1
-//        original.add(new Mino(
-//                new Piece(0, Direction.DOWN),
-//                new Piece(1, Direction.DOWN)));
-//        //0 1
-//        //1
-//        original.add(new Mino(
-//                new Piece(0, Direction.DOWN),
-//                new Piece(1, Direction.RIGHT),
-//                new Piece(1, Direction.DOWN)));
-//        //1
-//        //0
-//        //1
-//        original.add(new Mino(
-//                new Piece(0, Direction.DOWN),
-//                new Piece(1, Direction.UP),
-//                new Piece(1, Direction.DOWN)));
-        //  1
+        original.add(new Mino(new Piece(0, Direction.DOWN)));
+
+        //0
+        //1
+        original.add(new Mino(
+                new Piece(0, Direction.DOWN),
+                new Piece(1, Direction.DOWN)));
+        //0 1
+        //1
+        original.add(new Mino(
+                new Piece(0, Direction.DOWN),
+                new Piece(1, Direction.RIGHT),
+                new Piece(1, Direction.DOWN)));
+        //0
+        //1
+        //2
+        original.add(new Mino(
+                new Piece(0, Direction.DOWN),
+                new Piece(1, Direction.DOWN),
+                new Piece(2, Direction.DOWN)));
+
         //1 0 1
         //  1
         original.add(new Mino(
                 new Piece(0, Direction.DOWN),
-                new Piece(1, Direction.UP),
                 new Piece(1, Direction.LEFT),
                 new Piece(1, Direction.RIGHT),
                 new Piece(1, Direction.DOWN)));
@@ -124,12 +124,23 @@ public class GameManager extends Application {
         return root;
     }
 
+    private boolean isValidateState() {
+        for (int y = 0; y < GRID_HEIGHT; y++) {
+            for (int x = 0; x < GRID_WIDTH; x++) {
+                if (grid[x][y] > 1) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     private void update() {
         makeMove(p -> p.move(Direction.DOWN), p -> p.move(Direction.UP), true);
     }
 
     private void makeMove(Consumer<Mino> onSuccess, Consumer<Mino> onFail, boolean endMove) {
-        selected.move(Direction.DOWN);
+        selected.getPieces().forEach(p -> removePiece(p));
         onSuccess.accept(selected);
         boolean offBoard = selected.getPieces().stream().anyMatch(this::isOffBoard);
         if(!offBoard) {
@@ -137,16 +148,63 @@ public class GameManager extends Application {
         } else {
             onFail.accept(selected);
             selected.getPieces().forEach(p -> placePiece(p));
-        }
-        if (endMove) {
+            if (endMove) {
+                checkPieces();
+            }
             return;
+        }
+        if(!isValidateState()) {
+            selected.getPieces().forEach(p -> removePiece(p));
+            onFail.accept(selected);
+            if (endMove) {
+                checkPieces();
+            }
         }
     }
 
-//    private void checkPiece(){
-//
-//    }
+    private void checkPieces(){
+//        List<Integer> rows = sweepRows();
+//        rows.forEach(row -> {
+//            for (int x = 0; x < GRID_WIDTH; x++) {
+//                minos.forEach(mino -> {
+//                    mino.detach(mino.getX(), row);
+//                });
+//                grid[x][row]--;
+//            }
+//        });
+//        rows.forEach(row -> {
+//            minos.forEach(mino ->{
+//                mino.getPieces().forEach(
+//                        p -> {
+//                            if (p.getY() < row) {
+//                                removePiece(p);
+//                                p.setY(p.getY() + 1);
+//                                placePiece(p);
+//                            }
+//                        }
+//                );
+//            });
+//        });
+        selected.getPieces().forEach(p ->{
+            String target = p.getTag().toString();
 
+        });
+        spawn();
+    }
+
+    private List<Integer> sweepRows() {
+        List<Integer> rows = new ArrayList<>();
+        outer:
+        for (int y=0; y < GRID_HEIGHT; y++) {
+            for (int x=0; x < GRID_WIDTH; x++) {
+                if (grid[x][y] != 1) {
+                    continue outer;
+                }
+            }
+            rows.add(y);
+        }
+        return rows;
+    }
     private void render() {
         gc.clearRect(0, 0, GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE);
         minos.forEach(mino -> mino.draw(gc));
@@ -169,6 +227,9 @@ public class GameManager extends Application {
         // to be continued.
         for (Piece piece : mino.getPieces()) {
             placePiece(piece);
+        }
+        if(!isValidateState()) {
+            System.out.println("Game Over");
         }
     }
 
@@ -197,7 +258,7 @@ public class GameManager extends Application {
         Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
         double screenWidth = screenBounds.getWidth();
         double screenHeight = screenBounds.getHeight();
-        double gamePadding = (screenHeight - 670) / 2;
+        double gamePadding = (screenHeight - 750) / 2;
 
         // Create an ImageView and set an image
         Image image = new Image("file:./src/asset/Image/background.jpg");

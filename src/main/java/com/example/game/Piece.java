@@ -32,7 +32,7 @@ public class Piece {
      */
     public static final class Tag {
         private final Image image;
-        private final RecycleType type;
+        public final RecycleType type;
         /**
          * Constructs an object of type Tag.
          */
@@ -54,6 +54,10 @@ public class Piece {
         }
         public Image getImage() {
             return image;
+        }
+
+        public String toString() {
+            return type.toString();
         }
 
     }
