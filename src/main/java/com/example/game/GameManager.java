@@ -240,7 +240,7 @@ public class GameManager extends Application {
     }
 
     public void removePiece(final Piece piece) {
-        grid[piece.getX()][piece.getY()] = 0;
+        grid[piece.getX()][piece.getY()]--;
     }
 
     private boolean isOffBoard(final Piece piece) {
