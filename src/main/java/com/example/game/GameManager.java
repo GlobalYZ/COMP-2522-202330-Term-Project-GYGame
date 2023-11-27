@@ -124,11 +124,19 @@ public class GameManager extends Application {
         timer.start();
         return root;
     }
+    private boolean isTagID(final int id) {
+        for (Piece.RecycleType t : Piece.RecycleType.values()) {
+            if (t.tagID() == id) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     private boolean isValidateState() {
         for (int y = 0; y < GRID_HEIGHT; y++) {
             for (int x = 0; x < GRID_WIDTH; x++) {
-                if (grid[x][y] > 1) {
+                if (grid[x][y] > 1 && !isTagID(grid[x][y])) {
                     return false;
                 }
             }
@@ -150,6 +158,7 @@ public class GameManager extends Application {
             onFail.accept(selected);
             selected.getPieces().forEach(p -> placePiece(p));
             if (endMove) {
+                //TODO to assign tagID in the grid
                 checkPieces();
             }
             return;
@@ -159,6 +168,7 @@ public class GameManager extends Application {
             onFail.accept(selected);
             selected.getPieces().forEach(p -> placePiece(p));
             if (endMove) {
+                //TODO to assign tagID in the grid
                 checkPieces();
             }
         }
@@ -187,9 +197,8 @@ public class GameManager extends Application {
 //                );
 //            });
 //        });
-        selected.getPieces().forEach(p ->{
-            String target = p.getTag().toString();
-
+        selected.getPieces().forEach(p -> {
+            // TODO to be continued
         });
         spawn();
     }
@@ -199,7 +208,7 @@ public class GameManager extends Application {
         outer:
         for (int y=0; y < GRID_HEIGHT; y++) {
             for (int x=0; x < GRID_WIDTH; x++) {
-                if (grid[x][y] != 1) {
+                if (grid[x][y] != 1) {  // TODO logic needs to be changed
                     continue outer;
                 }
             }
@@ -226,7 +235,7 @@ public class GameManager extends Application {
         mino.move(GRID_WIDTH / 2, 0);
         selected = mino;
         minos.add(mino);
-        // to be continued.
+
         for (Piece piece : mino.getPieces()) {
             placePiece(piece);
         }
