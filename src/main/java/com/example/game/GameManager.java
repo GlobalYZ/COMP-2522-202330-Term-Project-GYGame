@@ -159,6 +159,7 @@ public class GameManager extends Application {
             selected.getPieces().forEach(p -> placePiece(p));
             if (endMove) {
                 //TODO to assign tagID in the grid
+                selected.getPieces().forEach( p -> grid[p.getX()][p.getY()] = p.getTag().getID());
                 checkPieces();
             }
             return;
@@ -175,31 +176,7 @@ public class GameManager extends Application {
     }
 
     private void checkPieces(){
-//        List<Integer> rows = sweepRows();
-//        rows.forEach(row -> {
-//            for (int x = 0; x < GRID_WIDTH; x++) {
-//                minos.forEach(mino -> {
-//                    mino.detach(mino.getX(), row);
-//                });
-//                grid[x][row]--;
-//            }
-//        });
-//        rows.forEach(row -> {
-//            minos.forEach(mino ->{
-//                mino.getPieces().forEach(
-//                        p -> {
-//                            if (p.getY() < row) {
-//                                removePiece(p);
-//                                p.setY(p.getY() + 1);
-//                                placePiece(p);
-//                            }
-//                        }
-//                );
-//            });
-//        });
-        selected.getPieces().forEach(p -> {
-            // TODO to be continued
-        });
+        
         spawn();
     }
 
@@ -212,6 +189,7 @@ public class GameManager extends Application {
                     continue outer;
                 }
             }
+            System.out.println(y);
             rows.add(y);
         }
         return rows;
