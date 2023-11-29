@@ -2,6 +2,7 @@ package com.example.game;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Rectangle2D;
@@ -148,6 +149,7 @@ public class GameManager extends Application {
     private boolean isValidateState() {
         for (int y = 0; y < GRID_HEIGHT; y++) {
             for (int x = 0; x < GRID_WIDTH; x++) {
+                System.out.println(grid[x][y]);
                 if (grid[x][y] > 1 && !isTagID(grid[x][y])) {
                     return false;
                 }
@@ -357,12 +359,7 @@ public class GameManager extends Application {
 
                 // add ESC key listener
                 Scene dialogScene = dialog.getDialogPane().getScene();
-                dialogScene.setOnKeyPressed(event -> {
-                    if (event.getCode() == KeyCode.ESCAPE) {
-                        dialog.close(); // 关闭 Dialog 对象，关闭对话框
-                        timer.start();
-                    }
-                });
+
 
                 // show dialog and wait for response
                 dialog.showAndWait().ifPresent(response -> {
@@ -372,6 +369,34 @@ public class GameManager extends Application {
                         System.out.println("User clicked Cancel");
                     }
                     timer.start();
+                });
+
+                dialogScene.setOnKeyPressed(event -> {
+                    if (event.getCode() == KeyCode.ESCAPE) {
+                        dialog.close(); // 关闭 Dialog 对象，关闭对话框
+                        timer.start();
+                    } else if (event.getCode() == KeyCode.RIGHT) {
+                        // Move focus to the next button to the right
+                        ButtonBar buttonBar = (ButtonBar) dialog.getDialogPane().lookup(".button-bar");
+                        if (buttonBar != null) {
+                            System.out.println("found");
+                            buttonBar.getButtons().stream()
+                                    .findFirst()
+                                    .ifPresent(Node::requestFocus);
+                        }
+                    } else if (event.getCode() == KeyCode.LEFT) {
+                        // Move focus to the previous button to the left
+                        ButtonBar buttonBar = (ButtonBar) dialog.getDialogPane().lookup(".button-bar");
+                        if (buttonBar != null) {
+                            ObservableList<Node> buttons = buttonBar.getButtons();
+                            for (int i = buttons.size() - 1; i >= 0; i--) {
+                                if (i > 0) {
+                                    buttons.get(i - 1).requestFocus();
+                                }
+                                break;
+                            }
+                        }
+                    }
                 });
 
             }
