@@ -24,7 +24,7 @@ public class Piece {
         Paper(11),
         Glass(12),
         Battery(13),
-        Booster(1);
+        Booster(14);
         private final int id;
         RecycleType(final int id) {
             this.id = id;
