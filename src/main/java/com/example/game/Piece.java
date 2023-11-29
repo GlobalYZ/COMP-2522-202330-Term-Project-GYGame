@@ -22,8 +22,8 @@ public class Piece {
     public enum RecycleType {
         Plastic(10),
         Paper(12),
-        Glass(14),
-        Battery(16),
+//        Glass(14),
+//        Battery(16),
         Booster(18);
         private final int id;
         RecycleType(final int id) {
