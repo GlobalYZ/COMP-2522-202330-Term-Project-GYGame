@@ -142,14 +142,12 @@ public class GameManager extends Application {
                 return true;
             }
         }
-        System.out.println("Invalid tag ID: " + id);
         return false;
     }
 
     private boolean isValidateState() {
         for (int y = 0; y < GRID_HEIGHT; y++) {
             for (int x = 0; x < GRID_WIDTH; x++) {
-                // TODO check bug
                 if (grid[x][y] > 1 && !isTagID(grid[x][y])) {
                     return false;
                 }
@@ -172,7 +170,7 @@ public class GameManager extends Application {
             onFail.accept(selected);  // move back to the last position
             selected.getPieces().forEach(p -> placePiece(p));
             if (endMove) {
-                selected.getPieces().forEach(p -> placeTagID(p));  //TODO check bug
+                selected.getPieces().forEach(p -> placeTagID(p));
                 checkAndRemove();
             }
             return;
@@ -182,7 +180,7 @@ public class GameManager extends Application {
             onFail.accept(selected);
             selected.getPieces().forEach(p -> placePiece(p));
             if (endMove) {
-                selected.getPieces().forEach(p -> placeTagID(p));  //TODO check bug
+                selected.getPieces().forEach(p -> placeTagID(p));
                 checkAndRemove();
             }
         }
