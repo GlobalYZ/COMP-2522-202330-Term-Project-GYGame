@@ -188,6 +188,36 @@ public class GameManager extends Application {
 
     private void checkAndRemove() {
         // TODO to be continued
+        boolean[][] toRemove = checkMatches();
+
+//        for (int x = 0; x < GRID_WIDTH; x++) {
+//            int shift = 0;
+//            for (int y = GRID_HEIGHT - 1; y >= 0; y--) {
+//                if (toRemove[x][y]) {
+//                    for (Mino mino : minos) {
+//                        int finalX1 = x;
+//                        int finalY1 = y;
+//                        mino.getPieces().removeIf(p -> p.getX() == finalX1 && p.getY() == finalY1);
+//                    }
+//                    grid[x][y] = 0;
+//                    shift++;
+//                } else if (shift > 0) {
+//                    int finalX = x;
+//                    int finalY = y;
+//                    int finalShift = shift;
+//                    for (Mino mino : minos) {
+//                        mino.getPieces().stream()
+//                                .filter(p -> p.getX() == finalX && p.getY() < finalY)
+//                                .forEach(p -> {
+//                                    removePiece(p);
+//                                    p.setY(p.getY() + finalShift);
+//                                    placeTagID(p);
+//                                });
+//                    }
+//                    // TODO map the grid to the minos
+//                }
+//            }
+//        }
 
         minoInQueue = minoPreview;  // overwrite the going-to-be-selected mino by the previous preview mino
         minoInQueue.move(GRID_WIDTH / 2, 0);
@@ -196,19 +226,47 @@ public class GameManager extends Application {
         spawn();
     }
 
-    private boolean[][] checkMatches() {
-        // TODO to be continued
-//        List<Integer> rows = new ArrayList<>();
-//        outer:
-//        for (int y=0; y < GRID_HEIGHT; y++) {
-//            for (int x=0; x < GRID_WIDTH; x++) {
-//                if (grid[x][y] != 1) {
-//                    continue outer;
-//                }
-//            }
-//            rows.add(y);
-//        }
-        return null;
+    private boolean[][] checkMatches() {  // return a boolean matrix to represent the matches to remove
+        boolean[][] toRemove = new boolean[GRID_WIDTH][GRID_HEIGHT];
+
+        // Check for vertical matches
+        for (int x = 0; x < GRID_WIDTH; x++) {
+            for (int y = GRID_HEIGHT - 1; y - 2 >= 0; y--) {
+                if (grid[x][y] != 0) {
+                    System.out.println("grid (" + x + ", " + y + ") value: " + grid[x][y]);
+                }  // check vertical grids for debug
+                if (grid[x][y] != 0 && grid[x][y] == grid[x][y - 1] && grid[x][y] == grid[x][y - 2]) {
+                    System.out.println("Vertical Match found at (" + x + ", " + y
+                            + "; " + x + ", " + (y - 1)
+                            + "; " + x + ", " + (y - 2)
+                            + ") with value " + grid[x][y]
+                            + " and " + grid[x][y - 1]
+                            + " and " + grid[x][y - 2]);
+                    toRemove[x][y] = true;
+                    toRemove[x][y - 1] = true;
+                    toRemove[x][y - 2] = true;
+                }
+            }
+        }
+
+        // Check for horizontal matches
+        for (int y = 0; y < GRID_HEIGHT; y++) {
+            for (int x = 0; x < GRID_WIDTH - 2; x++) {
+                if (grid[x][y] != 0 && grid[x][y] == grid[x + 1][y] && grid[x][y] == grid[x + 2][y]) {
+                    System.out.println("Horizontal Match found at (" + x + ", " + y
+                            + "; " + (x + 1) + ", " + y
+                            + "; " + (x + 2) + ", " + y
+                            + ") with value " + grid[x][y]
+                            + " and " + grid[x + 1][y]
+                            + " and " + grid[x + 2][y]);
+                    toRemove[x][y] = true;
+                    toRemove[x + 1][y] = true;
+                    toRemove[x + 2][y] = true;
+                }
+            }
+        }
+
+        return toRemove;
     }
     private void render() {
         gc.clearRect(0, 0, GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE);
@@ -251,6 +309,7 @@ public class GameManager extends Application {
     }
     public void placeTagID(final Piece piece) {
         grid[piece.getX()][piece.getY()] = piece.getTag().getID();
+//        System.out.println(grid[piece.getX()][piece.getY()]);
     }
 
     public void placePiece(final Piece piece) {
@@ -258,7 +317,7 @@ public class GameManager extends Application {
     }
 
     public void removePiece(final Piece piece) {
-        grid[piece.getX()][piece.getY()]--;
+        grid[piece.getX()][piece.getY()] = 0;
     }
 
     private boolean isOffBoard(final Piece piece) {
