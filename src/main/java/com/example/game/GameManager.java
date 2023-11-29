@@ -142,12 +142,14 @@ public class GameManager extends Application {
                 return true;
             }
         }
+        System.out.println("Invalid tag ID: " + id);
         return false;
     }
 
     private boolean isValidateState() {
         for (int y = 0; y < GRID_HEIGHT; y++) {
             for (int x = 0; x < GRID_WIDTH; x++) {
+                // TODO check bug
                 if (grid[x][y] > 1 && !isTagID(grid[x][y])) {
                     return false;
                 }
@@ -162,34 +164,33 @@ public class GameManager extends Application {
 
     private void makeMove(Consumer<Mino> onSuccess, Consumer<Mino> onFail, boolean endMove) {
         selected.getPieces().forEach(p -> removePiece(p));
-        onSuccess.accept(selected);
+        onSuccess.accept(selected);  // move down 1 unit
         boolean offBoard = selected.getPieces().stream().anyMatch(this::isOffBoard);
-        if(!offBoard) {
+        if (!offBoard) {
             selected.getPieces().forEach(p -> placePiece(p));
         } else {
-            onFail.accept(selected);
+            onFail.accept(selected);  // move back to the last position
             selected.getPieces().forEach(p -> placePiece(p));
             if (endMove) {
-                //TODO to assign tagID in the grid
-                checkPieces();
+                selected.getPieces().forEach(p -> placePiece(p));  //TODO check bug
+                checkAndRemove();
             }
             return;
         }
-        if(!isValidateState()) {
+        if (!isValidateState()) {
             selected.getPieces().forEach(p -> removePiece(p));
             onFail.accept(selected);
             selected.getPieces().forEach(p -> placePiece(p));
             if (endMove) {
-                //TODO to assign tagID in the grid
-                checkPieces();
+                selected.getPieces().forEach(p -> placePiece(p));  //TODO check bug
+                checkAndRemove();
             }
         }
     }
 
-    private void checkPieces() {
-        selected.getPieces().forEach(p -> {
-            // TODO to be continued
-        });
+    private void checkAndRemove() {
+        // TODO to be continued
+
         minoInQueue = minoPreview;  // overwrite the going-to-be-selected mino by the previous preview mino
         minoInQueue.move(GRID_WIDTH / 2, 0);
         minoPreview = original.get(new Random().nextInt(original.size())).copy();
@@ -197,18 +198,19 @@ public class GameManager extends Application {
         spawn();
     }
 
-    private List<Integer> sweepRows() {
-        List<Integer> rows = new ArrayList<>();
-        outer:
-        for (int y=0; y < GRID_HEIGHT; y++) {
-            for (int x=0; x < GRID_WIDTH; x++) {
-                if (grid[x][y] != 1) {  // TODO logic needs to be changed
-                    continue outer;
-                }
-            }
-            rows.add(y);
-        }
-        return rows;
+    private boolean[][] checkMatches() {
+        // TODO to be continued
+//        List<Integer> rows = new ArrayList<>();
+//        outer:
+//        for (int y=0; y < GRID_HEIGHT; y++) {
+//            for (int x=0; x < GRID_WIDTH; x++) {
+//                if (grid[x][y] != 1) {
+//                    continue outer;
+//                }
+//            }
+//            rows.add(y);
+//        }
+        return null;
     }
     private void render() {
         gc.clearRect(0, 0, GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE);
@@ -248,6 +250,9 @@ public class GameManager extends Application {
         if (!isValidateState()) {
             System.out.println("Game Over");
         }
+    }
+    public void placeTagID(final Piece piece) {
+        grid[piece.getX()][piece.getY()] = piece.getTag().getID();
     }
 
     public void placePiece(final Piece piece) {
