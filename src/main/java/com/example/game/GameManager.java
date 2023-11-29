@@ -179,8 +179,7 @@ public class GameManager extends Application {
         }
     }
 
-    private void checkPieces(){
-
+    private void checkPieces() {
         selected.getPieces().forEach(p -> {
             // TODO to be continued
         });
@@ -231,10 +230,7 @@ public class GameManager extends Application {
     private void spawn() {
         selected = minoInQueue;
         minos.add(minoInQueue);
-        // TODO update the preview here (refresh the preview box dynamically)
-        // TODO for Muyang: Use "minoPreview" variable to access the preview mino
-//        GameUIHelper helper = new GameUIHelper();
-//        helper.updatePreviewBox(root, minoPreview);
+
         Platform.runLater(() -> {
             Node previewContainer = root.lookup("#preview");
             List<Node> elements = new ArrayList<>();
@@ -248,12 +244,10 @@ public class GameManager extends Application {
                 ((VBox)previewContainer).getChildren().addAll(elements);
             }
         });
-
-
         for (Piece piece : minoInQueue.getPieces()) {
             placePiece(piece);
         }
-        if(!isValidateState()) {
+        if (!isValidateState()) {
             System.out.println("Game Over");
         }
     }
@@ -271,11 +265,6 @@ public class GameManager extends Application {
     }
 
     public void lunchPlayBoard(Stage stage) throws IOException {
-//        FXMLLoader loader = new FXMLLoader(getClass().getResource("play-board.fxml"));
-//        root = loader.load(); // Load the FXML file and get the root node
-
-        // Cast the root node to AnchorPane (or the appropriate type)
-//        AnchorPane anchorPane = (AnchorPane) root;
 
         // Create the root node (for example, an AnchorPane)
         root = new AnchorPane();
