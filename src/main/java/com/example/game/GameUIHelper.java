@@ -6,6 +6,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
@@ -15,10 +16,21 @@ import java.util.List;
 
 public final class GameUIHelper {
 
+    public static final String backgroundColor = "-fx-background-color: #fee3c5;";
+
 
     public static final String boxStyle = "-fx-background-color: #fee3c5;" +
             "-fx-border-color: #000000;-fx-border-width: 2px;" +
             "-fx-border-radius: 5px;";
+
+    public static final String activeButtonStyle = "-fx-background-color: #2ed573; -fx-text-fill: #ffffff;" +
+            "-fx-border-color: black; -fx-border-radius: 5px; -fx-background-radius:8px; -fx-font-size: 20px;" +
+            "-fx-border-width:3px; -fx-shadow-color: #000000; -fx-shadow-radius: 5px; -fx-shadow-inset: 0px;" +
+            "-fx-cursor: hand;";
+
+    public static final String inactiveButtonStyle = "-fx-background-color: #dfe6e9; -fx-text-fill: #929292;" +
+            "-fx-border-color: #929292; -fx-border-radius: 5px; -fx-background-radius:8px;" +
+            "-fx-font-size: 20px; -fx-border-width:3px;";
 
 
     public static Node generatePreviewElement(String path, int size) {
@@ -80,5 +92,14 @@ public final class GameUIHelper {
         LvBox.setStyle(boxStyle);
         LvBox.getChildren().add(LvText);
         return LvBox;
+    }
+
+    public static Button createGeneralButton(String context){
+        Button btn = new Button();
+        btn.setText(context);
+        btn.setStyle(activeButtonStyle);
+        btn.setMinHeight(50);
+        btn.setMinWidth(140);
+        return btn;
     }
 }

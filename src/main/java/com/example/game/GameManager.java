@@ -9,8 +9,10 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
+import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.event.ActionEvent;
@@ -18,6 +20,7 @@ import javafx.fxml.FXML;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.function.Consumer;
 
@@ -26,7 +29,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.image.Image;
 import javafx.geometry.Pos;
-
+import javafx.stage.StageStyle;
 
 
 public class GameManager extends Application {
@@ -45,6 +48,10 @@ public class GameManager extends Application {
     private Integer comboCount = 0;
 
     private Integer level = 1;
+
+    private AnimationTimer timer;
+
+
 
     private final int[][] grid = new int[GRID_WIDTH][GRID_HEIGHT];
 
@@ -114,7 +121,7 @@ public class GameManager extends Application {
         minoInQueue.move(GRID_WIDTH / 2, 0);
         minoPreview = original.get(new Random().nextInt(original.size())).copy(); // generate the next mino for preview
 
-        AnimationTimer timer = new AnimationTimer() {
+        timer = new AnimationTimer() {
             @Override
             public void handle(long now) {
                 time += 0.03;
@@ -216,34 +223,25 @@ public class GameManager extends Application {
         }
     }
 
-    public Node getNode(Node root, String id) {
-        final Node node = root.lookup(id);
-        if (node == null) {
-            throw new NullPointerException(
-                    "cannot find child node fx:id for argument: " + id);
-        }
-
-        return node;
-    }
-
 
     private void spawn() {
         selected = minoInQueue;
         minos.add(minoInQueue);
 
         Platform.runLater(() -> {
-            Node previewContainer = root.lookup("#preview");
+            Node targetNode = root.lookup("#preview");
             List<Node> elements = new ArrayList<>();
-            if (previewContainer == null) {
+            if (targetNode == null) {
                 throw new NullPointerException("cannot find child node fx:id for argument: preview");
             } else {
                 minoPreview.getPieces().forEach(p -> {
                     elements.add(GameUIHelper.generatePreviewElement(p.getTag().getImageString(), TILE_SIZE));
                 });
-                ((VBox)previewContainer).getChildren().clear();
-                ((VBox)previewContainer).getChildren().addAll(elements);
+                ((VBox)targetNode).getChildren().clear();
+                ((VBox)targetNode).getChildren().addAll(elements);
             }
         });
+
         for (Piece piece : minoInQueue.getPieces()) {
             placePiece(piece);
         }
@@ -262,6 +260,12 @@ public class GameManager extends Application {
 
     private boolean isOffBoard(final Piece piece) {
         return piece.getX() < 0 || piece.getX() >= GRID_WIDTH || piece.getY() < 0 || piece.getY() >= GRID_HEIGHT;
+    }
+
+    private void stopTimer() {
+        if (timer != null) {
+            timer.stop();
+        }
     }
 
     public void lunchPlayBoard(Stage stage) throws IOException {
@@ -330,10 +334,51 @@ public class GameManager extends Application {
                 makeMove(p -> p.move(Direction.LEFT), p -> p.move(Direction.RIGHT), false);
             } else if (e.getCode() == KeyCode.DOWN) {
                 makeMove(p -> p.move(Direction.DOWN), p -> p.move(Direction.UP), true);
+            } else if (e.getCode() == KeyCode.ESCAPE) {
+                stopTimer();
+                Dialog<ButtonType> dialog = new Dialog<>();
+                dialog.setTitle("Pause");
+                dialog.setContentText("Do you want to restart the game or save & leave?");
+
+                ButtonType okButtonType = new ButtonType("RESUME", ButtonBar.ButtonData.OK_DONE);
+                ButtonType cancelButtonType = new ButtonType("RESTART", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+
+                // ADD BUTTONS
+                dialog.getDialogPane().getButtonTypes().addAll(okButtonType, cancelButtonType);
+                dialog.getDialogPane().getChildren().stream().forEach(node -> {
+                    node.setStyle("-fx-text-alignment: center;-fx-font-size: 20px;" + GameUIHelper.backgroundColor);
+                });
+
+                // Add a CSS stylesheet to the dialog pane
+                dialog.getDialogPane().getStylesheets().add(
+                        getClass().getResource("overWrite.css").toExternalForm()
+                );
+
+                // add ESC key listener
+                Scene dialogScene = dialog.getDialogPane().getScene();
+                dialogScene.setOnKeyPressed(event -> {
+                    if (event.getCode() == KeyCode.ESCAPE) {
+                        dialog.close(); // 关闭 Dialog 对象，关闭对话框
+                        timer.start();
+                    }
+                });
+
+                // show dialog and wait for response
+                dialog.showAndWait().ifPresent(response -> {
+                    if (response == ButtonType.OK) {
+                        System.out.println("User clicked OK");
+                    } else if (response == ButtonType.CANCEL) {
+                        System.out.println("User clicked Cancel");
+                    }
+                    timer.start();
+                });
+
             }
+
+
             render();
         });
-
         stage.setScene(scene);
         stage.setMaximized(true);
         stage.setTitle("EcoStack");

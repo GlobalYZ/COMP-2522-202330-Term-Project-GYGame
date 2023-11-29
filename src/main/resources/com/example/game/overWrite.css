@@ -1,0 +1,28 @@
+/* Style for OK button */
+.button {
+    /* Your styles here */
+    -fx-background-color: #fbccc2;
+    -fx-text-fill: #ffffff;
+    -fx-border-color: black;
+    -fx-border-radius: 5px;
+    -fx-background-radius:8px;
+    -fx-font-size: 20px;
+    -fx-border-width:3px;
+    -fx-shadow-color: #000000;
+    -fx-shadow-radius: 5px;
+    -fx-shadow-inset: 0px;
+    -fx-cursor: hand;
+}
+
+/* Style for Cancel button */
+.button:cancel {
+    -fx-background-color: #feffef;
+    -fx-text-fill: black;
+}
+
+.button:hover {
+    -fx-shadow-radius: 8px;
+    -fx-shadow-inset: 3px;
+    -fx-background-color: #eb728b;
+}
+
