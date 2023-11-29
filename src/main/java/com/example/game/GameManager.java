@@ -29,9 +29,11 @@ import javafx.geometry.Pos;
 
 
 public class GameManager extends Application {
-    private double time;
-
+    public static final int TILE_SIZE = 40; // Grace's constant don't delete it.
+    public static final int GRID_WIDTH = 10;
+    public static final int GRID_HEIGHT = 16;
     public GraphicsContext gc;
+    private double time;
 
     private Integer scoreNum = 0;
 
@@ -41,16 +43,15 @@ public class GameManager extends Application {
 
     private Integer level = 1;
 
-    public static final int TILE_SIZE = 40; // Grace's constant don't delete it.
-    public static final int GRID_WIDTH = 10;
-    public static final int GRID_HEIGHT = 16;
-
     private final int[][] grid = new int[GRID_WIDTH][GRID_HEIGHT];
 
 
-    private final List<Mino> original = new ArrayList<>();  // initial minos
+    private final List<Mino> original = new ArrayList<>();  // initial minos collection
     private final List<Mino> minos = new ArrayList<>();  // minos on the board
-    private Mino selected; // using user input to move this mino
+    private Mino selected; // the mino that is going to be moved
+    private Mino minoInQueue; // the mino that is going to be selected on the board
+    private Mino minoPreview; // the mino that is going to be placed on the board
+
 
 
     private void generateBasicMinos() {
@@ -96,10 +97,7 @@ public class GameManager extends Application {
             e.printStackTrace(); // Handle the IOException appropriately
         }
     }
-
-
-
-    private Parent setContent(){
+    private Parent setContent() {
         Pane root = new Pane();
         root.setPrefSize(GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE);
 
@@ -107,7 +105,10 @@ public class GameManager extends Application {
         gc = canvas.getGraphicsContext2D();
         root.getChildren().add(canvas);
 
-        generateBasicMinos();
+        generateBasicMinos(); // generate the basic minos collection
+        minoInQueue = original.get(new Random().nextInt(original.size())).copy();  // generate the first mino for spawn
+        minoInQueue.move(GRID_WIDTH / 2, 0);
+        minoPreview = original.get(new Random().nextInt(original.size())).copy(); // generate the next mino for preview
         spawn();
 
         AnimationTimer timer = new AnimationTimer() {
@@ -124,6 +125,7 @@ public class GameManager extends Application {
         timer.start();
         return root;
     }
+
     private boolean isTagID(final int id) {
         for (Piece.RecycleType t : Piece.RecycleType.values()) {
             if (t.tagID() == id) {
@@ -159,7 +161,6 @@ public class GameManager extends Application {
             selected.getPieces().forEach(p -> placePiece(p));
             if (endMove) {
                 //TODO to assign tagID in the grid
-                selected.getPieces().forEach( p -> grid[p.getX()][p.getY()] = p.getTag().getID());
                 checkPieces();
             }
             return;
@@ -176,7 +177,35 @@ public class GameManager extends Application {
     }
 
     private void checkPieces(){
-        
+//        List<Integer> rows = sweepRows();
+//        rows.forEach(row -> {
+//            for (int x = 0; x < GRID_WIDTH; x++) {
+//                minos.forEach(mino -> {
+//                    mino.detach(mino.getX(), row);
+//                });
+//                grid[x][row]--;
+//            }
+//        });
+//        rows.forEach(row -> {
+//            minos.forEach(mino ->{
+//                mino.getPieces().forEach(
+//                        p -> {
+//                            if (p.getY() < row) {
+//                                removePiece(p);
+//                                p.setY(p.getY() + 1);
+//                                placePiece(p);
+//                            }
+//                        }
+//                );
+//            });
+//        });
+        selected.getPieces().forEach(p -> {
+            // TODO to be continued
+        });
+        minoInQueue = minoPreview;  // overwrite the going-to-be-selected mino by the previous preview mino
+        minoInQueue.move(GRID_WIDTH / 2, 0);
+        minoPreview = original.get(new Random().nextInt(original.size())).copy();
+        // overwrite the preview mino by the next previewing mino
         spawn();
     }
 
@@ -189,7 +218,6 @@ public class GameManager extends Application {
                     continue outer;
                 }
             }
-            System.out.println(y);
             rows.add(y);
         }
         return rows;
@@ -209,12 +237,12 @@ public class GameManager extends Application {
 
 
     private void spawn() {
-        Mino mino = original.get(new Random().nextInt(original.size())).copy();
-        mino.move(GRID_WIDTH / 2, 0);
-        selected = mino;
-        minos.add(mino);
+        selected = minoInQueue;
+        minos.add(minoInQueue);
+        // TODO update the preview here (refresh the preview box dynamically)
+        // TODO for Muyang: Use "minoPreview" variable to access the preview mino
 
-        for (Piece piece : mino.getPieces()) {
+        for (Piece piece : minoInQueue.getPieces()) {
             placePiece(piece);
         }
         if(!isValidateState()) {
