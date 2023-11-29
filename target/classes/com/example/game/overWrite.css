@@ -26,3 +26,7 @@
     -fx-background-color: #eb728b;
 }
 
+.button-bar {
+    -fx-content-display: center;
+}
+
