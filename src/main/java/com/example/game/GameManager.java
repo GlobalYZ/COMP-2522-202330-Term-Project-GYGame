@@ -172,7 +172,7 @@ public class GameManager extends Application {
             onFail.accept(selected);  // move back to the last position
             selected.getPieces().forEach(p -> placePiece(p));
             if (endMove) {
-                selected.getPieces().forEach(p -> placePiece(p));  //TODO check bug
+                selected.getPieces().forEach(p -> placeTagID(p));  //TODO check bug
                 checkAndRemove();
             }
             return;
@@ -182,7 +182,7 @@ public class GameManager extends Application {
             onFail.accept(selected);
             selected.getPieces().forEach(p -> placePiece(p));
             if (endMove) {
-                selected.getPieces().forEach(p -> placePiece(p));  //TODO check bug
+                selected.getPieces().forEach(p -> placeTagID(p));  //TODO check bug
                 checkAndRemove();
             }
         }
