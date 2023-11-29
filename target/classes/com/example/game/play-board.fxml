@@ -3,10 +3,6 @@
 <?import javafx.scene.text.Text?>
 
 <AnchorPane xmlns="http://javafx.com/javafx/11" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.game.GameUIHelper">
-<HBox alignment="CENTER" fx:id="myBox">
-<!--    <HBox prefWidth="300" prefHeight="600" style="-fx-background-color: #fee3c5;">-->
-<!--        <Text text="Score:170" style="-fx-font-size: 20px;"/>-->
-<!--    </HBox>-->
-</HBox>
+
 </AnchorPane>
 

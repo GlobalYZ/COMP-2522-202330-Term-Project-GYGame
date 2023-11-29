@@ -1,5 +1,7 @@
 package com.example.game;
+import javafx.fxml.FXML;
 
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
@@ -12,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class GameUIHelper {
-
 
 
     public static final String boxStyle = "-fx-background-color: #fee3c5;" +
@@ -80,7 +81,4 @@ public final class GameUIHelper {
         LvBox.getChildren().add(LvText);
         return LvBox;
     }
-
-
-
 }

@@ -39,6 +39,8 @@ public class Piece {
      */
     public static final class Tag {
         private final Image image;
+
+        private final String imageString;
         public final RecycleType type;
         /**
          * Constructs an object of type Tag.
@@ -54,13 +56,18 @@ public class Piece {
             }
             Random random = new Random();
             type = recycleTypes.get(random.nextInt(recycleTypes.size()));
-            image = new Image("file:./src/asset/Image/" + type.name() + ".png");
+            imageString = "file:./src/asset/Image/" + type.name() + ".png";
+            image = new Image(imageString);
         }
         public RecycleType getType() {
             return type;
         }
         public Image getImage() {
             return image;
+        }
+
+        public String getImageString() {
+            return imageString;
         }
         public int getID() {
             return type.tagID();
