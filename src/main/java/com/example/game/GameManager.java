@@ -199,13 +199,22 @@ public class GameManager extends Application {
                     });
         }
     }
-    private void gravity(final int targetX, final int targetY) {
-        if (targetX >= 0 && targetY < GRID_HEIGHT - 1 && grid[targetX][targetY] != 0) {
-            int drop = 0;
-            while (targetY + drop < GRID_HEIGHT - 1 && grid[targetX][targetY + drop + 1] == 0) {
-                drop++;
+    private void gravity(final int targetX, final int targetY, final boolean onLeft) {
+        int drop = 0;
+        if (onLeft) {
+            if (targetX >= 0 && targetY < GRID_HEIGHT - 1 && grid[targetX][targetY] != 0) {
+                while (targetY + drop < GRID_HEIGHT - 1 && grid[targetX][targetY + drop + 1] == 0) {
+                    drop++;
+                }
+                dropPieces(targetX, targetY, drop);
             }
-            dropPieces(targetX, targetY, drop);
+        } else {
+            if (targetX < GRID_WIDTH && targetY < GRID_HEIGHT - 1 && grid[targetX][targetY] != 0) {
+                while (targetY + drop < GRID_HEIGHT - 1 && grid[targetX][targetY + drop + 1] == 0) {
+                    drop++;
+                }
+                dropPieces(targetX, targetY, drop);
+            }
         }
     }
 
@@ -230,10 +239,10 @@ public class GameManager extends Application {
                     }
                     dropPieces(x, y, shift);
                     // Gravity for the pieces on the left and right
-                    gravity(x - 1, y + match);
-                    gravity(x - 2, y + match);
-                    gravity(x + 1, y + match);
-                    gravity(x + 2, y + match);
+                    gravity(x - 1, y + match, true);
+                    gravity(x - 2, y + match, true);
+                    gravity(x + 1, y + match, false);
+                    gravity(x + 2, y + match, false);
 
                     // TODO check one more time if there is any match after shifting
                 }
