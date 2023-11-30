@@ -301,6 +301,16 @@ public class GameManager extends Application {
         spawn();
     }
 
+    private void boosterMarkRemove(final boolean[][] toRemove, final int tagID) {
+        for (int x = 0; x < GRID_WIDTH; x++) {
+            for (int y = GRID_HEIGHT - 1; y >= 0; y--) {
+                if (grid[x][y] == tagID) {
+                    toRemove[x][y] = true;
+                }
+            }
+        }
+    }
+
     public boolean[][] checkMatches() {  // return a boolean matrix to represent the matches to remove
         boolean[][] toRemove = new boolean[GRID_WIDTH][GRID_HEIGHT];
 
@@ -312,6 +322,15 @@ public class GameManager extends Application {
                     toRemove[x][y - 1] = true;
                     toRemove[x][y - 2] = true;
                 }
+                if ((grid[x][y] == 18 && grid[x][y - 1] != 0 && grid[x][y - 1] == grid[x][y - 2])
+                        || (grid[x][y] != 0 && grid[x][y] == grid[x][y - 1] && grid[x][y - 2] == 18)
+                        || (grid[x][y] != 0 && grid[x][y] == grid[x][y - 2] && grid[x][y - 1] == 18)) {
+                    toRemove[x][y] = true;
+                    toRemove[x][y - 1] = true;
+                    toRemove[x][y - 2] = true;
+                    int tagID = grid[x][y] == 18 ? grid[x][y - 1] : grid[x][y];
+                    boosterMarkRemove(toRemove, tagID);
+                }
             }
         }
 
@@ -322,6 +341,15 @@ public class GameManager extends Application {
                     toRemove[x][y] = true;
                     toRemove[x + 1][y] = true;
                     toRemove[x + 2][y] = true;
+                }
+                if ((grid[x][y] == 18 && grid[x + 1][y] != 0 && grid[x + 1][y] == grid[x + 2][y])
+                        || (grid[x][y] != 0 && grid[x][y] == grid[x + 1][y] && grid[x + 2][y] == 18)
+                        || (grid[x][y] != 0 && grid[x][y] == grid[x + 2][y] && grid[x + 1][y] == 18)) {
+                    toRemove[x][y] = true;
+                    toRemove[x + 1][y] = true;
+                    toRemove[x + 2][y] = true;
+                    int tagID = grid[x][y] == 18 ? grid[x + 1][y] : grid[x][y];
+                    boosterMarkRemove(toRemove, tagID);
                 }
             }
         }

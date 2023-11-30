@@ -22,10 +22,9 @@ public class Piece implements Serializable {
      */
 
 
-    public enum RecycleType implements Serializable{
+    public enum RecycleType implements Serializable {
         Plastic(10),
         Paper(12),
-
         Glass(14),
         Battery(16),
         Booster(18);
@@ -41,7 +40,7 @@ public class Piece implements Serializable {
     /**
      * Tag.
      */
-    public static final class Tag implements Serializable{
+    public static final class Tag implements Serializable {
 
         private final String imageString;
         public final RecycleType type;
