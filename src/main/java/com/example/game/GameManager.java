@@ -2,7 +2,6 @@ package com.example.game;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Rectangle2D;
@@ -12,9 +11,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
-import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.event.ActionEvent;
@@ -22,7 +19,6 @@ import javafx.fxml.FXML;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 import java.util.function.Consumer;
 
@@ -31,7 +27,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.image.Image;
 import javafx.geometry.Pos;
-import javafx.stage.StageStyle;
 
 
 public class GameManager extends Application {
@@ -188,7 +183,7 @@ public class GameManager extends Application {
         }
     }
 
-    private void dropPieces(final int targetX, final int targetY, final int shift) {
+    private void dropPiece(final int targetX, final int targetY, final int shift) {
         for (Mino mino : minos) {
             mino.getPieces().stream()
                     .filter(p -> p.getX() == targetX && p.getY() == targetY)
@@ -206,14 +201,14 @@ public class GameManager extends Application {
                 while (targetY + drop < GRID_HEIGHT - 1 && grid[targetX][targetY + drop + 1] == 0) {
                     drop++;
                 }
-                dropPieces(targetX, targetY, drop);
+                dropPiece(targetX, targetY, drop);
             }
         } else {
             if (targetX < GRID_WIDTH && targetY < GRID_HEIGHT - 1 && grid[targetX][targetY] != 0) {
                 while (targetY + drop < GRID_HEIGHT - 1 && grid[targetX][targetY + drop + 1] == 0) {
                     drop++;
                 }
-                dropPieces(targetX, targetY, drop);
+                dropPiece(targetX, targetY, drop);
             }
         }
     }
@@ -249,7 +244,7 @@ public class GameManager extends Application {
                         while (y + shift < GRID_HEIGHT - 1 && grid[x][y + shift + 1] == 0) {
                             shift++;
                         }
-                        dropPieces(x, y, shift);
+                        dropPiece(x, y, shift);
                         // Gravity for the pieces on the left and right
                         gravity(x - 1, y + match, true);
                         gravity(x - 2, y + match, true);
