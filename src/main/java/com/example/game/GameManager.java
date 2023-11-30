@@ -54,6 +54,9 @@ public class GameManager extends Application {
     private Integer level = 1;
 
     private AnimationTimer timer;
+    private AnimationTimer loadtimer;
+
+    private double loadtime;
 
 
 
@@ -147,7 +150,7 @@ public class GameManager extends Application {
         minoPreview = original.get(new Random().nextInt(original.size())).copy(); // generate the next mino for preview
 
         timer = new AnimationTimer() {
-            boolean flag = false;
+
             @Override
             public void handle(long now) {
                 time += 0.03;
@@ -156,17 +159,23 @@ public class GameManager extends Application {
                         update();
                         render();
                     }
-                    if(!flag) {
-                        saveGame();
-                        flag = true;
-                    } else {
-                        flag = false;
-                    }
                     time = 0;
                 }
             }
         };
 
+        loadtimer = new AnimationTimer(){
+            @Override
+            public void handle(long now) {
+                loadtime += 0.03;
+                if(loadtime >= 5) {
+                    saveGame();
+                    loadtime = 0;
+                }
+            }
+
+        };
+        loadtimer.start();
         timer.start();
         return root;
     }
@@ -455,7 +464,6 @@ public class GameManager extends Application {
         Scene scene = new Scene(root);
         // keyboard event
         scene.setOnKeyPressed(e -> {
-            System.out.println("outer pressed");
             if (e.getCode() == KeyCode.UP) {
                 makeMove(Mino::rotate, Mino::rotateBack, false);
             } else if (e.getCode() == KeyCode.RIGHT) {
@@ -489,8 +497,6 @@ public class GameManager extends Application {
 
                 // show dialog and wait for response
                 dialog.showAndWait().ifPresent(response -> {
-                    System.out.println(response== ButtonType.OK);
-                    System.out.println(response.getText());
                     if (response.getText() == "RESUME") {
                         System.out.println("User clicked OK");
                     } else if (response.getText() == "LEAVE") {
@@ -529,6 +535,18 @@ public class GameManager extends Application {
     }
 
     public void saveGame() {
+        File file = new File("src/load.txt");
+
+        if (!file.exists()) {
+            try {
+                // create the file when it does not exist
+                if (file.createNewFile()) {
+                    System.out.println("File created: " + file.getName());
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         JsonFormatter jsonFormatter = new JsonFormatter();
         jsonFormatter.minoPreview = this.minoPreview;
         jsonFormatter.minoInQueue = this.minoInQueue;
@@ -549,6 +567,7 @@ public class GameManager extends Application {
     }
 
     public void loadGame() {
+
         try (FileInputStream fileIn = new FileInputStream("src/load.txt");
              ObjectInputStream in = new ObjectInputStream(fileIn)) {
             JsonFormatter gameMapper = (JsonFormatter) in.readObject();
@@ -561,7 +580,6 @@ public class GameManager extends Application {
             minos = gameMapper.minos;
             selected = gameMapper.selected;
             grid = gameMapper.grid;
-            System.out.println("Object read from JSON and written to load.txt");
             renderPreviews();
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
@@ -580,7 +598,7 @@ public class GameManager extends Application {
         stage.setTitle("EcoStack");
         stage.show();
         Platform.runLater(()->{
-            Button loadBtn = (Button) welcomeRoot.lookup("loadGameButton");
+            Button loadBtn = (Button) welcomeRoot.lookup("#loadGameButton");
             File file = new File("src/load.txt");
             if (file.length() == 0) {
                 loadBtn.setDisable(true);
