@@ -217,42 +217,54 @@ public class GameManager extends Application {
             }
         }
     }
-
-    private void checkAndRemove() {
-        // TODO to be continued
-        boolean[][] toRemove = checkMatches();
-
+    private boolean hasMatch(final boolean[][] toRemove) {
         for (int x = 0; x < GRID_WIDTH; x++) {
-            int match = 0;
             for (int y = GRID_HEIGHT - 1; y >= 0; y--) {
                 if (toRemove[x][y]) {
-                    for (Mino mino : minos) {
-                        mino.detach(x, y);
-                    }
-                    grid[x][y] = 0;
-                    match++;
-                } else if (match > 0) {
-                    int shift = match;
-                    // another gravity, check if there are empty spots below the removed pieces
-                    while (y + shift < GRID_HEIGHT - 1 && grid[x][y + shift + 1] == 0) {
-                        shift++;
-                    }
-                    dropPieces(x, y, shift);
-                    // Gravity for the pieces on the left and right
-                    gravity(x - 1, y + match, true);
-                    gravity(x - 2, y + match, true);
-                    gravity(x + 1, y + match, false);
-                    gravity(x + 2, y + match, false);
-
-                    // TODO check one more time if there is any match after shifting
+                    System.out.println("Combo!");
+                    // TODO add combo count or special effect
+                    return true;
                 }
             }
+        }
+        return false;
+    }
+
+    private void checkAndRemove() {
+        boolean[][] toRemove = checkMatches();
+        boolean hasMatch = hasMatch(toRemove);
+        while (hasMatch) {
+            for (int x = 0; x < GRID_WIDTH; x++) {
+                int match = 0;
+                for (int y = GRID_HEIGHT - 1; y >= 0; y--) {
+                    if (toRemove[x][y]) {
+                        for (Mino mino : minos) {
+                            mino.detach(x, y);
+                        }
+                        grid[x][y] = 0;
+                        match++;
+                    } else if (match > 0) {
+                        int shift = match;
+                        // another gravity, check if there are empty spots below the removed pieces
+                        while (y + shift < GRID_HEIGHT - 1 && grid[x][y + shift + 1] == 0) {
+                            shift++;
+                        }
+                        dropPieces(x, y, shift);
+                        // Gravity for the pieces on the left and right
+                        gravity(x - 1, y + match, true);
+                        gravity(x - 2, y + match, true);
+                        gravity(x + 1, y + match, false);
+                        gravity(x + 2, y + match, false);
+                    }
+                }
+            }
+            toRemove = checkMatches();
+            hasMatch = hasMatch(toRemove);
         }
 
         minoInQueue = minoPreview;  // overwrite the going-to-be-selected mino by the previous preview mino
         minoInQueue.move(GRID_WIDTH / 2, 0);
         minoPreview = original.get(new Random().nextInt(original.size())).copy();
-        // overwrite the preview mino by the next previewing mino
         spawn();
     }
 
