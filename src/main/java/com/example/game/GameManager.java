@@ -263,8 +263,6 @@ public class GameManager extends Application {
         for (int x = 0; x < GRID_WIDTH; x++) {
             for (int y = GRID_HEIGHT - 1; y >= 0; y--) {
                 if (toRemove[x][y]) {
-                    System.out.println("Combo!");
-                    // TODO add combo count or special effect
                     return true;
                 }
             }
@@ -302,6 +300,10 @@ public class GameManager extends Application {
             }
             toRemove = checkMatches();
             hasMatch = hasMatch(toRemove);
+            if (hasMatch) {
+                System.out.println("Combo!");
+                // TODO add combo count or special effect
+            }
         }
 
         minoInQueue = minoPreview;  // overwrite the going-to-be-selected mino by the previous preview mino
