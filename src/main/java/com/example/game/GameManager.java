@@ -139,7 +139,6 @@ public class GameManager extends Application {
     }
 
     private boolean isTagID(final int id) {
-        System.out.println("id is " + id);
         for (Piece.RecycleType t : Piece.RecycleType.values()) {
             if (t.tagID() == id) {
                 return true;
@@ -189,38 +188,52 @@ public class GameManager extends Application {
         }
     }
 
+    private void dropPieces(final int targetX, final int targetY, final int shift) {
+        for (Mino mino : minos) {
+            mino.getPieces().stream()
+                    .filter(p -> p.getX() == targetX && p.getY() == targetY)
+                    .forEach(p -> {
+                        clearPiece(p);
+                        p.setY(p.getY() + shift);
+                        placeTagID(p);
+                    });
+        }
+    }
+    private void gravity(final int targetX, final int targetY) {
+        if (targetX >= 0 && targetY < GRID_HEIGHT - 1 && grid[targetX][targetY] != 0) {
+            int drop = 0;
+            while (targetY + drop < GRID_HEIGHT - 1 && grid[targetX][targetY + drop + 1] == 0) {
+                drop++;
+            }
+            dropPieces(targetX, targetY, drop);
+        }
+    }
+
     private void checkAndRemove() {
         // TODO to be continued
         boolean[][] toRemove = checkMatches();
 
         for (int x = 0; x < GRID_WIDTH; x++) {
-            int shift = 0;
+            int match = 0;
             for (int y = GRID_HEIGHT - 1; y >= 0; y--) {
                 if (toRemove[x][y]) {
                     for (Mino mino : minos) {
                         mino.detach(x, y);
                     }
                     grid[x][y] = 0;
-                    shift++;
-                } else if (shift > 0) {
+                    match++;
+                } else if (match > 0) {
+                    int shift = match;
                     // another gravity, check if there are empty spots below the removed pieces
                     while (y + shift < GRID_HEIGHT - 1 && grid[x][y + shift + 1] == 0) {
                         shift++;
                     }
-                    for (Mino mino : minos) {
-                        int finalShift = shift;
-                        int finalX = x;
-                        int finalY = y;
-                        mino.getPieces().stream()
-                                .filter(p -> p.getX() == finalX && p.getY() == finalY)
-                                .forEach(p -> {
-                                    clearPiece(p);
-                                    p.setY(p.getY() + finalShift);
-                                    placePiece(p);
-                                    placeTagID(p);
-                                });
-                    }
-                    // TODO shift the adjacent piece when detached
+                    dropPieces(x, y, shift);
+                    // Gravity for the pieces on the left and right
+                    gravity(x - 1, y + match);
+                    gravity(x - 2, y + match);
+                    gravity(x + 1, y + match);
+                    gravity(x + 2, y + match);
 
                     // TODO check one more time if there is any match after shifting
                 }
@@ -241,12 +254,6 @@ public class GameManager extends Application {
         for (int x = 0; x < GRID_WIDTH; x++) {
             for (int y = GRID_HEIGHT - 1; y - 2 >= 0; y--) {
                 if (grid[x][y] != 0 && grid[x][y] == grid[x][y - 1] && grid[x][y] == grid[x][y - 2]) {
-//                    System.out.println("Vertical Match found at (" + x + ", " + y
-//                            + "; " + x + ", " + (y - 1)
-//                            + "; " + x + ", " + (y - 2)
-//                            + ") with value " + grid[x][y]
-//                            + " and " + grid[x][y - 1]
-//                            + " and " + grid[x][y - 2]);
                     toRemove[x][y] = true;
                     toRemove[x][y - 1] = true;
                     toRemove[x][y - 2] = true;
@@ -258,12 +265,6 @@ public class GameManager extends Application {
         for (int y = 0; y < GRID_HEIGHT; y++) {
             for (int x = 0; x < GRID_WIDTH - 2; x++) {
                 if (grid[x][y] != 0 && grid[x][y] == grid[x + 1][y] && grid[x][y] == grid[x + 2][y]) {
-//                    System.out.println("Horizontal Match found at (" + x + ", " + y
-//                            + "; " + (x + 1) + ", " + y
-//                            + "; " + (x + 2) + ", " + y
-//                            + ") with value " + grid[x][y]
-//                            + " and " + grid[x + 1][y]
-//                            + " and " + grid[x + 2][y]);
                     toRemove[x][y] = true;
                     toRemove[x + 1][y] = true;
                     toRemove[x + 2][y] = true;
