@@ -202,8 +202,11 @@ public class GameManager extends Application {
                     }
                     grid[x][y] = 0;
                     shift++;
-                    System.out.println("shift: " + shift);
                 } else if (shift > 0) {
+                    // another gravity, check if there are empty spots below the removed pieces
+                    while (y + shift < GRID_HEIGHT - 1 && grid[x][y + shift + 1] == 0) {
+                        shift++;
+                    }
                     for (Mino mino : minos) {
                         int finalShift = shift;
                         int finalX = x;
@@ -218,6 +221,7 @@ public class GameManager extends Application {
                                 });
                     }
                     // TODO shift the adjacent piece when detached
+
                     // TODO check one more time if there is any match after shifting
                 }
             }
