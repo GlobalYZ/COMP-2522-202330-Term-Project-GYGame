@@ -11,9 +11,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
-import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.event.ActionEvent;
@@ -22,7 +20,6 @@ import javafx.fxml.FXML;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -34,7 +31,9 @@ import javafx.scene.layout.HBox;
 import javafx.scene.image.Image;
 import javafx.geometry.Pos;
 
+
 import java.io.IOException;
+
 
 
 public class GameManager extends Application {
@@ -172,8 +171,7 @@ public class GameManager extends Application {
         return root;
     }
 
-    public boolean isTagID(final int id) {
-        System.out.println("id is " + id);
+    private boolean isTagID(final int id) {
         for (Piece.RecycleType t : Piece.RecycleType.values()) {
             if (t.tagID() == id) {
                 return true;
@@ -223,48 +221,83 @@ public class GameManager extends Application {
         }
     }
 
-    public void checkAndRemove() {
-        // TODO to be continued
-        boolean[][] toRemove = checkMatches();
-
+    private void dropPiece(final int targetX, final int targetY, final int shift) {
+        for (Mino mino : minos) {
+            mino.getPieces().stream()
+                    .filter(p -> p.getX() == targetX && p.getY() == targetY)
+                    .forEach(p -> {
+                        clearPiece(p);
+                        p.setY(p.getY() + shift);
+                        placeTagID(p);
+                    });
+        }
+    }
+    private void gravity(final int targetX, final int targetY, final boolean onLeft) {
+        int drop = 0;
+        if (onLeft) {
+            if (targetX >= 0 && targetY < GRID_HEIGHT - 1 && grid[targetX][targetY] != 0) {
+                while (targetY + drop < GRID_HEIGHT - 1 && grid[targetX][targetY + drop + 1] == 0) {
+                    drop++;
+                }
+                dropPiece(targetX, targetY, drop);
+            }
+        } else {
+            if (targetX < GRID_WIDTH && targetY < GRID_HEIGHT - 1 && grid[targetX][targetY] != 0) {
+                while (targetY + drop < GRID_HEIGHT - 1 && grid[targetX][targetY + drop + 1] == 0) {
+                    drop++;
+                }
+                dropPiece(targetX, targetY, drop);
+            }
+        }
+    }
+    private boolean hasMatch(final boolean[][] toRemove) {
         for (int x = 0; x < GRID_WIDTH; x++) {
-            int shift = 0;
             for (int y = GRID_HEIGHT - 1; y >= 0; y--) {
                 if (toRemove[x][y]) {
-                    for (Mino mino : minos) {
-                        mino.detach(x, y);
-                    }
-                    grid[x][y] = 0;
-                    shift++;
-                } else if (shift > 0) {
-                    // another gravity, check if there are empty spots below the removed pieces
-                    while (y + shift < GRID_HEIGHT - 1 && grid[x][y + shift + 1] == 0) {
-                        shift++;
-                    }
-                    for (Mino mino : minos) {
-                        int finalShift = shift;
-                        int finalX = x;
-                        int finalY = y;
-                        mino.getPieces().stream()
-                                .filter(p -> p.getX() == finalX && p.getY() == finalY)
-                                .forEach(p -> {
-                                    clearPiece(p);
-                                    p.setY(p.getY() + finalShift);
-                                    placePiece(p);
-                                    placeTagID(p);
-                                });
-                    }
-                    // TODO shift the adjacent piece when detached
-
-                    // TODO check one more time if there is any match after shifting
+                    System.out.println("Combo!");
+                    // TODO add combo count or special effect
+                    return true;
                 }
             }
+        }
+        return false;
+    }
+
+    private void checkAndRemove() {
+        boolean[][] toRemove = checkMatches();
+        boolean hasMatch = hasMatch(toRemove);
+        while (hasMatch) {
+            for (int x = 0; x < GRID_WIDTH; x++) {
+                int match = 0;
+                for (int y = GRID_HEIGHT - 1; y >= 0; y--) {
+                    if (toRemove[x][y]) {
+                        for (Mino mino : minos) {
+                            mino.detach(x, y);
+                        }
+                        grid[x][y] = 0;
+                        match++;
+                    } else if (match > 0) {
+                        int shift = match;
+                        // another gravity, check if there are empty spots below the removed pieces
+                        while (y + shift < GRID_HEIGHT - 1 && grid[x][y + shift + 1] == 0) {
+                            shift++;
+                        }
+                        dropPiece(x, y, shift);
+                        // Gravity for the pieces on the left and right
+                        gravity(x - 1, y + match, true);
+                        gravity(x - 2, y + match, true);
+                        gravity(x + 1, y + match, false);
+                        gravity(x + 2, y + match, false);
+                    }
+                }
+            }
+            toRemove = checkMatches();
+            hasMatch = hasMatch(toRemove);
         }
 
         minoInQueue = minoPreview;  // overwrite the going-to-be-selected mino by the previous preview mino
         minoInQueue.move(GRID_WIDTH / 2, 0);
         minoPreview = original.get(new Random().nextInt(original.size())).copy();
-        // overwrite the preview mino by the next previewing mino
         spawn();
     }
 
@@ -275,12 +308,6 @@ public class GameManager extends Application {
         for (int x = 0; x < GRID_WIDTH; x++) {
             for (int y = GRID_HEIGHT - 1; y - 2 >= 0; y--) {
                 if (grid[x][y] != 0 && grid[x][y] == grid[x][y - 1] && grid[x][y] == grid[x][y - 2]) {
-//                    System.out.println("Vertical Match found at (" + x + ", " + y
-//                            + "; " + x + ", " + (y - 1)
-//                            + "; " + x + ", " + (y - 2)
-//                            + ") with value " + grid[x][y]
-//                            + " and " + grid[x][y - 1]
-//                            + " and " + grid[x][y - 2]);
                     toRemove[x][y] = true;
                     toRemove[x][y - 1] = true;
                     toRemove[x][y - 2] = true;
@@ -292,12 +319,6 @@ public class GameManager extends Application {
         for (int y = 0; y < GRID_HEIGHT; y++) {
             for (int x = 0; x < GRID_WIDTH - 2; x++) {
                 if (grid[x][y] != 0 && grid[x][y] == grid[x + 1][y] && grid[x][y] == grid[x + 2][y]) {
-//                    System.out.println("Horizontal Match found at (" + x + ", " + y
-//                            + "; " + (x + 1) + ", " + y
-//                            + "; " + (x + 2) + ", " + y
-//                            + ") with value " + grid[x][y]
-//                            + " and " + grid[x + 1][y]
-//                            + " and " + grid[x + 2][y]);
                     toRemove[x][y] = true;
                     toRemove[x + 1][y] = true;
                     toRemove[x + 2][y] = true;
@@ -312,19 +333,15 @@ public class GameManager extends Application {
         minos.forEach(mino -> mino.draw(gc));
     }
 
-    public void calculateScore(Piece piece) {
-        if (comboCount > 0) {
-            scoreNum += 10 * comboCount;
-        } else {
-            scoreNum += 10;
-        }
-    }
+//    public void calculateScore(Piece piece) {
+//        if (comboCount > 0) {
+//            scoreNum += 10 * comboCount;
+//        } else {
+//            scoreNum += 10;
+//        }
+//    }
 
-
-    public void spawn() {
-        selected = minoInQueue;
-        minos.add(minoInQueue);
-
+    private void renderPreviews(){
         Platform.runLater(() -> {
             Node targetNode = root.lookup("#preview");
             List<Node> elements = new ArrayList<>();
@@ -338,6 +355,14 @@ public class GameManager extends Application {
                 ((VBox)targetNode).getChildren().addAll(elements);
             }
         });
+    }
+
+
+    public void spawn() {
+        selected = minoInQueue;
+        minos.add(minoInQueue);
+
+        renderPreviews();
 
         for (Piece piece : minoInQueue.getPieces()) {
             placePiece(piece);
@@ -537,6 +562,7 @@ public class GameManager extends Application {
             selected = gameMapper.selected;
             grid = gameMapper.grid;
             System.out.println("Object read from JSON and written to load.txt");
+            renderPreviews();
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }

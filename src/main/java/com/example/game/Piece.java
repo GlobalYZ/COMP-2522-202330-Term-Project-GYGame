@@ -20,9 +20,12 @@ public class Piece implements Serializable {
     /**
      * RecycleType.
      */
+
+
     public enum RecycleType implements Serializable{
-//        Plastic(10),
-//        Paper(12),
+        Plastic(10),
+        Paper(12),
+
         Glass(14),
         Battery(16),
         Booster(18);
