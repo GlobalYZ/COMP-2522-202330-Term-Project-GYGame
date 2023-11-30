@@ -2,11 +2,12 @@ package com.example.game;
 
 import javafx.scene.image.Image;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class Piece {
+public class Piece implements Serializable {
     private final int distance;
     private Direction direction;
 
@@ -19,7 +20,7 @@ public class Piece {
     /**
      * RecycleType.
      */
-    public enum RecycleType {
+    public enum RecycleType implements Serializable{
 //        Plastic(10),
 //        Paper(12),
         Glass(14),
@@ -37,8 +38,7 @@ public class Piece {
     /**
      * Tag.
      */
-    public static final class Tag {
-        private final Image image;
+    public static final class Tag implements Serializable{
 
         private final String imageString;
         public final RecycleType type;
@@ -57,13 +57,9 @@ public class Piece {
             Random random = new Random();
             type = recycleTypes.get(random.nextInt(recycleTypes.size()));
             imageString = "file:./src/asset/Image/" + type.name() + ".png";
-            image = new Image(imageString);
         }
         public RecycleType getType() {
             return type;
-        }
-        public Image getImage() {
-            return image;
         }
 
         public String getImageString() {

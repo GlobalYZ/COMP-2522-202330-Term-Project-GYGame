@@ -12,7 +12,7 @@
             <HBox alignment="CENTER" spacing="50.0" style="-fx-padding:30px;">
                 <children>
                     <Button fx:id="newGameButton" onAction="#startNewGame" mnemonicParsing="false" prefHeight="50.0" prefWidth="100.0" text="NEW" />
-                    <Button fx:id="loadGameButton" mnemonicParsing="false" prefHeight="50.0" prefWidth="100.0" text="LOAD" disable="true"/>
+                    <Button fx:id="loadGameButton" onAction="#loadOldGame" mnemonicParsing="false" prefHeight="50.0" prefWidth="100.0" text="LOAD"/>
                 </children>
             </HBox>
         </children>

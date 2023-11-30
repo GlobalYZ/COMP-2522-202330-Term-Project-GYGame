@@ -1,11 +1,14 @@
 package com.example.game;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import static com.example.game.GameManager.TILE_SIZE;
 
-public class Mino {
+public class Mino implements Serializable {
     private int x;
     private int y;
     private final List<Piece> pieces;
@@ -52,7 +55,8 @@ public class Mino {
     public void draw(final GraphicsContext gc) {
 
         pieces.forEach(pc -> {
-            gc.drawImage(pc.getTag().getImage(), pc.getX() * TILE_SIZE, pc.getY() * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+            Image image = new Image(pc.getTag().getImageString());
+            gc.drawImage(image, pc.getX() * TILE_SIZE, pc.getY() * TILE_SIZE, TILE_SIZE, TILE_SIZE);
         });
     }
     public void rotateBack() {

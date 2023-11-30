@@ -4,7 +4,8 @@ module com.example.demo {
 
     requires org.controlsfx.controls;
     requires org.kordamp.bootstrapfx.core;
+    requires com.fasterxml.jackson.databind;
 
-    opens com.example.game to javafx.fxml;
+    opens com.example.game to javafx.fxml, com.fasterxml.jackson.databind;
     exports com.example.game;
 }
