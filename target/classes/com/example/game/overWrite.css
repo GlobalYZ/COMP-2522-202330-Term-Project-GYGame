@@ -1,8 +1,8 @@
 /* Style for OK button */
 .button {
     /* Your styles here */
-    -fx-background-color: #fbccc2;
-    -fx-text-fill: #ffffff;
+    -fx-background-color: #feffef;
+    -fx-text-fill: black;
     -fx-border-color: black;
     -fx-border-radius: 5px;
     -fx-background-radius:8px;
@@ -16,8 +16,8 @@
 
 /* Style for Cancel button */
 .button:cancel {
-    -fx-background-color: #feffef;
-    -fx-text-fill: black;
+    -fx-background-color: #fbccc2;
+    -fx-text-fill: #ffffff;
 }
 
 .button:hover {
@@ -26,7 +26,22 @@
     -fx-background-color: #eb728b;
 }
 
-.button-bar {
-    -fx-content-display: center;
+.button:disabled {
+    -fx-background-color: #dfe6e9;
+    -fx-text-fill: #929292;
+    -fx-border-color: #929292;
 }
+
+.dialog-pane .button-bar {
+    -fx-spacing: 10; /* Adjust spacing between buttons */
+    -fx-content-display: center; /* Center align the buttons vertically */
+}
+
+
+.dialog-pane .button-bar .container .button {
+    -fx-alignment: center; /* Center align button text */
+    -fx-text-alignment: center; /* Center align button text */
+}
+
+
 

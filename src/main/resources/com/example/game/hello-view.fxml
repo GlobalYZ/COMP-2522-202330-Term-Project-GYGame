@@ -11,8 +11,8 @@
         <children>
             <HBox alignment="CENTER" spacing="50.0" style="-fx-padding:30px;">
                 <children>
-                    <Button fx:id="newGameButton" onAction="#startNewGame" mnemonicParsing="false" prefHeight="50.0" prefWidth="100.0" style="-fx-background-color: #b7d332; -fx-text-fill: #ffffff; -fx-border-color: black; -fx-border-radius: 5px; -fx-background-radius:8px; -fx-font-size: 20px; -fx-border-width:3px; -fx-shadow-color: #000000; -fx-shadow-radius: 5px; -fx-shadow-inset: 0px;-fx-cursor: hand;" text="NEW" />
-                    <Button fx:id="loadGameButton" mnemonicParsing="false" prefHeight="50.0" prefWidth="100.0" style="-fx-background-color: #dfe6e9; -fx-text-fill: #929292; -fx-border-color: #929292; -fx-border-radius: 5px; -fx-background-radius:8px; -fx-font-size: 20px; -fx-border-width:3px;" text="LOAD" disable="true"/>
+                    <Button fx:id="newGameButton" onAction="#startNewGame" mnemonicParsing="false" prefHeight="50.0" prefWidth="100.0" text="NEW" />
+                    <Button fx:id="loadGameButton" mnemonicParsing="false" prefHeight="50.0" prefWidth="100.0" text="LOAD" disable="true"/>
                 </children>
             </HBox>
         </children>

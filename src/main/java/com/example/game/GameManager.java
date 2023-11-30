@@ -12,6 +12,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
@@ -197,26 +198,27 @@ public class GameManager extends Application {
             for (int y = GRID_HEIGHT - 1; y >= 0; y--) {
                 if (toRemove[x][y]) {
                     for (Mino mino : minos) {
-                        int finalX1 = x;
-                        int finalY1 = y;
-                        mino.getPieces().removeIf(p -> p.getX() == finalX1 && p.getY() == finalY1);
+                        mino.detach(x, y);
                     }
                     grid[x][y] = 0;
                     shift++;
+                    System.out.println("shift: " + shift);
                 } else if (shift > 0) {
-                    int finalX = x;
-                    int finalY = y;
-                    int finalShift = shift;
                     for (Mino mino : minos) {
+                        int finalShift = shift;
+                        int finalX = x;
+                        int finalY = y;
                         mino.getPieces().stream()
-                                .filter(p -> p.getX() == finalX && p.getY() < finalY)
+                                .filter(p -> p.getX() == finalX && p.getY() == finalY)
                                 .forEach(p -> {
-                                    removePiece(p);
+                                    clearPiece(p);
                                     p.setY(p.getY() + finalShift);
+                                    placePiece(p);
                                     placeTagID(p);
                                 });
                     }
-                    // TODO map the grid to the minos
+                    // TODO shift the adjacent piece when detached
+                    // TODO check one more time if there is any match after shifting
                 }
             }
         }
@@ -234,16 +236,13 @@ public class GameManager extends Application {
         // Check for vertical matches
         for (int x = 0; x < GRID_WIDTH; x++) {
             for (int y = GRID_HEIGHT - 1; y - 2 >= 0; y--) {
-//                if (grid[x][y] != 0) {
-//                    System.out.println("grid (" + x + ", " + y + ") value: " + grid[x][y]);
-//                }  // check vertical grids for debug
                 if (grid[x][y] != 0 && grid[x][y] == grid[x][y - 1] && grid[x][y] == grid[x][y - 2]) {
-                    System.out.println("Vertical Match found at (" + x + ", " + y
-                            + "; " + x + ", " + (y - 1)
-                            + "; " + x + ", " + (y - 2)
-                            + ") with value " + grid[x][y]
-                            + " and " + grid[x][y - 1]
-                            + " and " + grid[x][y - 2]);
+//                    System.out.println("Vertical Match found at (" + x + ", " + y
+//                            + "; " + x + ", " + (y - 1)
+//                            + "; " + x + ", " + (y - 2)
+//                            + ") with value " + grid[x][y]
+//                            + " and " + grid[x][y - 1]
+//                            + " and " + grid[x][y - 2]);
                     toRemove[x][y] = true;
                     toRemove[x][y - 1] = true;
                     toRemove[x][y - 2] = true;
@@ -255,12 +254,12 @@ public class GameManager extends Application {
         for (int y = 0; y < GRID_HEIGHT; y++) {
             for (int x = 0; x < GRID_WIDTH - 2; x++) {
                 if (grid[x][y] != 0 && grid[x][y] == grid[x + 1][y] && grid[x][y] == grid[x + 2][y]) {
-                    System.out.println("Horizontal Match found at (" + x + ", " + y
-                            + "; " + (x + 1) + ", " + y
-                            + "; " + (x + 2) + ", " + y
-                            + ") with value " + grid[x][y]
-                            + " and " + grid[x + 1][y]
-                            + " and " + grid[x + 2][y]);
+//                    System.out.println("Horizontal Match found at (" + x + ", " + y
+//                            + "; " + (x + 1) + ", " + y
+//                            + "; " + (x + 2) + ", " + y
+//                            + ") with value " + grid[x][y]
+//                            + " and " + grid[x + 1][y]
+//                            + " and " + grid[x + 2][y]);
                     toRemove[x][y] = true;
                     toRemove[x + 1][y] = true;
                     toRemove[x + 2][y] = true;
@@ -320,6 +319,9 @@ public class GameManager extends Application {
 
     public void removePiece(final Piece piece) {
         grid[piece.getX()][piece.getY()]--;
+    }
+    public void clearPiece(final Piece piece) {
+        grid[piece.getX()][piece.getY()] = 0;
     }
 
     private boolean isOffBoard(final Piece piece) {
@@ -390,6 +392,7 @@ public class GameManager extends Application {
         Scene scene = new Scene(root);
         // keyboard event
         scene.setOnKeyPressed(e -> {
+            System.out.println("outer pressed");
             if (e.getCode() == KeyCode.UP) {
                 makeMove(Mino::rotate, Mino::rotateBack, false);
             } else if (e.getCode() == KeyCode.RIGHT) {
@@ -405,11 +408,12 @@ public class GameManager extends Application {
                 dialog.setContentText("Do you want to restart the game or save & leave?");
 
                 ButtonType okButtonType = new ButtonType("RESUME", ButtonBar.ButtonData.OK_DONE);
-                ButtonType cancelButtonType = new ButtonType("RESTART", ButtonBar.ButtonData.CANCEL_CLOSE);
+                ButtonType cancelButtonType = new ButtonType("RESTART", ButtonBar.ButtonData.FINISH);
+                ButtonType leaveButtonType = new ButtonType("LEAVE", ButtonBar.ButtonData.CANCEL_CLOSE);
 
 
                 // ADD BUTTONS
-                dialog.getDialogPane().getButtonTypes().addAll(okButtonType, cancelButtonType);
+                dialog.getDialogPane().getButtonTypes().addAll(okButtonType, cancelButtonType,leaveButtonType);
                 dialog.getDialogPane().getChildren().stream().forEach(node -> {
                     node.setStyle("-fx-text-alignment: center;-fx-font-size: 20px;" + GameUIHelper.backgroundColor);
                 });
@@ -419,46 +423,19 @@ public class GameManager extends Application {
                         getClass().getResource("overWrite.css").toExternalForm()
                 );
 
-                // add ESC key listener
-                Scene dialogScene = dialog.getDialogPane().getScene();
-
 
                 // show dialog and wait for response
                 dialog.showAndWait().ifPresent(response -> {
+                    System.out.println(response== ButtonType.OK);
+                    System.out.println(response.getText());
                     if (response == ButtonType.OK) {
                         System.out.println("User clicked OK");
                     } else if (response == ButtonType.CANCEL) {
                         System.out.println("User clicked Cancel");
+                    } else if (response.getText() == "RESTART") {
+                        resetGame();
                     }
                     timer.start();
-                });
-
-                dialogScene.setOnKeyPressed(event -> {
-                    if (event.getCode() == KeyCode.ESCAPE) {
-                        dialog.close(); // 关闭 Dialog 对象，关闭对话框
-                        timer.start();
-                    } else if (event.getCode() == KeyCode.RIGHT) {
-                        // Move focus to the next button to the right
-                        ButtonBar buttonBar = (ButtonBar) dialog.getDialogPane().lookup(".button-bar");
-                        if (buttonBar != null) {
-                            System.out.println("found");
-                            buttonBar.getButtons().stream()
-                                    .findFirst()
-                                    .ifPresent(Node::requestFocus);
-                        }
-                    } else if (event.getCode() == KeyCode.LEFT) {
-                        // Move focus to the previous button to the left
-                        ButtonBar buttonBar = (ButtonBar) dialog.getDialogPane().lookup(".button-bar");
-                        if (buttonBar != null) {
-                            ObservableList<Node> buttons = buttonBar.getButtons();
-                            for (int i = buttons.size() - 1; i >= 0; i--) {
-                                if (i > 0) {
-                                    buttons.get(i - 1).requestFocus();
-                                }
-                                break;
-                            }
-                        }
-                    }
                 });
 
             }
@@ -473,10 +450,31 @@ public class GameManager extends Application {
         spawn();
     }
 
+    private void resetGame(){
+        for (int y = 0; y < GRID_HEIGHT; y++) {
+            for (int x = 0; x < GRID_WIDTH; x++) {
+                grid[x][y] = 0;
+            }
+        }
+        scoreNum = 0;
+        gc.clearRect(0, 0, GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE);
+        minos.clear();
+        minoPreview = original.get(new Random().nextInt(original.size())).copy();
+        minoInQueue = minoPreview;  // overwrite the going-to-be-selected mino by the previous preview mino
+        minoInQueue.move(GRID_WIDTH / 2, 0);
+        minoPreview = original.get(new Random().nextInt(original.size())).copy();
+        spawn();
+    }
+
     @Override
     public void start(Stage stage) throws IOException {
+
         Parent root = FXMLLoader.load(getClass().getResource("hello-view.fxml"));
-        stage.setScene(new Scene(root, 400, 275));
+        Scene welcomeScene = new Scene(root, 400, 275);
+        welcomeScene.getStylesheets().add(
+                getClass().getResource("overWrite.css").toExternalForm()
+        );
+        stage.setScene(welcomeScene);
         stage.setTitle("EcoStack");
         stage.show();
     }
