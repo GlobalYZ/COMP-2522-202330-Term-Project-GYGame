@@ -37,6 +37,7 @@ import java.io.IOException;
 
 
 public class GameManager extends Application {
+    public static final int BOOSTER_ID = 18;
     public static final int TILE_SIZE = 40; // Grace's constant don't delete it.
     public static final int GRID_WIDTH = 10;
     public static final int GRID_HEIGHT = 16;
@@ -212,7 +213,7 @@ public class GameManager extends Application {
             selected.getPieces().forEach(p -> placePiece(p));
         } else {
             onFail.accept(selected);  // move back to the last position
-            selected.getPieces().forEach(p -> placePiece(p));
+//            selected.getPieces().forEach(p -> placePiece(p));
             if (endMove) {
                 selected.getPieces().forEach(p -> placeTagID(p));
                 checkAndRemove();
@@ -222,7 +223,7 @@ public class GameManager extends Application {
         if (!isValidateState()) {
             selected.getPieces().forEach(p -> removePiece(p));
             onFail.accept(selected);
-            selected.getPieces().forEach(p -> placePiece(p));
+//            selected.getPieces().forEach(p -> placePiece(p));
             if (endMove) {
                 selected.getPieces().forEach(p -> placeTagID(p));
                 checkAndRemove();
@@ -313,6 +314,7 @@ public class GameManager extends Application {
     }
 
     private void boosterMarkRemove(final boolean[][] toRemove, final int tagID) {
+        System.out.println("Booster deleting tagID: " + tagID);
         for (int x = 0; x < GRID_WIDTH; x++) {
             for (int y = GRID_HEIGHT - 1; y >= 0; y--) {
                 if (grid[x][y] == tagID) {
@@ -322,25 +324,24 @@ public class GameManager extends Application {
         }
     }
 
-    public boolean[][] checkMatches() {  // return a boolean matrix to represent the matches to remove
+    private boolean[][] checkMatches() {  // return a boolean matrix to represent the matches to remove
         boolean[][] toRemove = new boolean[GRID_WIDTH][GRID_HEIGHT];
 
         // Check for vertical matches
         for (int x = 0; x < GRID_WIDTH; x++) {
             for (int y = GRID_HEIGHT - 1; y - 2 >= 0; y--) {
-                if (grid[x][y] != 0 && grid[x][y] == grid[x][y - 1] && grid[x][y] == grid[x][y - 2]) {
+                if ((grid[x][y] != 0 && grid[x][y] == grid[x][y - 1] && grid[x][y] == grid[x][y - 2])
+                || (grid[x][y] == BOOSTER_ID && grid[x][y - 1] != 0 && grid[x][y - 1] == grid[x][y - 2])
+                || (grid[x][y] != 0 && grid[x][y] == grid[x][y - 1] && grid[x][y - 2] == BOOSTER_ID)
+                        || (grid[x][y] != 0 && grid[x][y] == grid[x][y - 2] && grid[x][y - 1] == BOOSTER_ID)) {
                     toRemove[x][y] = true;
                     toRemove[x][y - 1] = true;
                     toRemove[x][y - 2] = true;
-                }
-                if ((grid[x][y] == 18 && grid[x][y - 1] != 0 && grid[x][y - 1] == grid[x][y - 2])
-                        || (grid[x][y] != 0 && grid[x][y] == grid[x][y - 1] && grid[x][y - 2] == 18)
-                        || (grid[x][y] != 0 && grid[x][y] == grid[x][y - 2] && grid[x][y - 1] == 18)) {
-                    toRemove[x][y] = true;
-                    toRemove[x][y - 1] = true;
-                    toRemove[x][y - 2] = true;
-                    int tagID = grid[x][y] == 18 ? grid[x][y - 1] : grid[x][y];
-                    boosterMarkRemove(toRemove, tagID);
+                    // TODO check if any of the pieces is a booster
+                    if (grid[x][y] == BOOSTER_ID || grid[x][y - 1] == BOOSTER_ID || grid[x][y - 2] == BOOSTER_ID) {
+                        int tagID = grid[x][y] == BOOSTER_ID ? grid[x][y - 1] : grid[x][y];
+                        boosterMarkRemove(toRemove, tagID);
+                    }
                 }
             }
         }
@@ -348,19 +349,17 @@ public class GameManager extends Application {
         // Check for horizontal matches
         for (int y = 0; y < GRID_HEIGHT; y++) {
             for (int x = 0; x < GRID_WIDTH - 2; x++) {
-                if (grid[x][y] != 0 && grid[x][y] == grid[x + 1][y] && grid[x][y] == grid[x + 2][y]) {
+                if (grid[x][y] != 0 && grid[x][y] == grid[x + 1][y] && grid[x][y] == grid[x + 2][y]
+                || (grid[x][y] == BOOSTER_ID && grid[x + 1][y] != 0 && grid[x + 1][y] == grid[x + 2][y])
+                || (grid[x][y] != 0 && grid[x][y] == grid[x + 1][y] && grid[x + 2][y] == BOOSTER_ID)
+                || (grid[x][y] != 0 && grid[x][y] == grid[x + 2][y] && grid[x + 1][y] == BOOSTER_ID)) {
                     toRemove[x][y] = true;
                     toRemove[x + 1][y] = true;
                     toRemove[x + 2][y] = true;
-                }
-                if ((grid[x][y] == 18 && grid[x + 1][y] != 0 && grid[x + 1][y] == grid[x + 2][y])
-                        || (grid[x][y] != 0 && grid[x][y] == grid[x + 1][y] && grid[x + 2][y] == 18)
-                        || (grid[x][y] != 0 && grid[x][y] == grid[x + 2][y] && grid[x + 1][y] == 18)) {
-                    toRemove[x][y] = true;
-                    toRemove[x + 1][y] = true;
-                    toRemove[x + 2][y] = true;
-                    int tagID = grid[x][y] == 18 ? grid[x + 1][y] : grid[x][y];
-                    boosterMarkRemove(toRemove, tagID);
+                    if (grid[x][y] == BOOSTER_ID || grid[x + 1][y] == BOOSTER_ID || grid[x + 2][y] == BOOSTER_ID) {
+                        int tagID = grid[x][y] == BOOSTER_ID ? grid[x + 1][y] : grid[x][y];
+                        boosterMarkRemove(toRemove, tagID);
+                    }
                 }
             }
         }
@@ -380,7 +379,7 @@ public class GameManager extends Application {
 //        }
 //    }
 
-    private void renderPreviews(){
+    private void renderPreviews() {
         Platform.runLater(() -> {
             Node targetNode = root.lookup("#preview");
             List<Node> elements = new ArrayList<>();
