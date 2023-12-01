@@ -216,7 +216,7 @@ public class GameManager extends Application {
             selected.getPieces().forEach(p -> placePiece(p));
         } else {
             onFail.accept(selected);  // move back to the last position
-//            selected.getPieces().forEach(p -> placePiece(p));
+            selected.getPieces().forEach(p -> placePiece(p));
             if (endMove) {
                 selected.getPieces().forEach(p -> placeTagID(p));
                 checkAndRemove();
@@ -226,7 +226,7 @@ public class GameManager extends Application {
         if (!isValidateState()) {
             selected.getPieces().forEach(p -> removePiece(p));
             onFail.accept(selected);
-//            selected.getPieces().forEach(p -> placePiece(p));
+            selected.getPieces().forEach(p -> placePiece(p));
             if (endMove) {
                 selected.getPieces().forEach(p -> placeTagID(p));
                 checkAndRemove();
@@ -347,7 +347,6 @@ public class GameManager extends Application {
                     toRemove[x][y] = true;
                     toRemove[x][y - 1] = true;
                     toRemove[x][y - 2] = true;
-                    // TODO check if any of the pieces is a booster
                     if (grid[x][y] == BOOSTER_ID || grid[x][y - 1] == BOOSTER_ID || grid[x][y - 2] == BOOSTER_ID) {
                         tagID = grid[x][y] == BOOSTER_ID ? grid[x][y - 1] : grid[x][y];
                         boosterMarkRemove(toRemove, tagID);
