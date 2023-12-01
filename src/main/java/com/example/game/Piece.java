@@ -49,9 +49,9 @@ public class Piece implements Serializable {
          */
         public Tag() {
             List<RecycleType> recycleTypes = new ArrayList<>();
-            // chance of getting booster is 1/16
+            // chance of getting booster is 1/25
             for (RecycleType t : RecycleType.values()) {
-                int count = t == RecycleType.Booster ? 1 : 4;
+                int count = t == RecycleType.Booster ? 1 : 5;
                 for (int i = 0; i < count; i++) {
                     recycleTypes.add(t);
                 }
