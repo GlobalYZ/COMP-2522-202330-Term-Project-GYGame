@@ -339,10 +339,10 @@ public class GameManager extends Application {
         // Check for vertical matches
         for (int x = 0; x < GRID_WIDTH; x++) {
             for (int y = GRID_HEIGHT - 1; y - 2 >= 0; y--) {
-                if ((grid[x][y] != 0 && grid[x][y] == grid[x][y - 1] && grid[x][y] == grid[x][y - 2])
-                || (grid[x][y] == BOOSTER_ID && grid[x][y - 1] != 0 && grid[x][y - 1] == grid[x][y - 2])
+                if ((grid[x][y] == BOOSTER_ID && grid[x][y - 1] != 0 && grid[x][y - 1] == grid[x][y - 2])
                 || (grid[x][y] != 0 && grid[x][y] == grid[x][y - 1] && grid[x][y - 2] == BOOSTER_ID)
                 || (grid[x][y] != 0 && grid[x][y] == grid[x][y - 2] && grid[x][y - 1] == BOOSTER_ID)
+                || (grid[x][y] != 0 && grid[x][y] == grid[x][y - 1] && grid[x][y] == grid[x][y - 2])  // normal match
                 ) {
                     toRemove[x][y] = true;
                     toRemove[x][y - 1] = true;
@@ -358,10 +358,10 @@ public class GameManager extends Application {
         // Check for horizontal matches
         for (int y = 0; y < GRID_HEIGHT; y++) {
             for (int x = 0; x < GRID_WIDTH - 2; x++) {
-                if (grid[x][y] != 0 && grid[x][y] == grid[x + 1][y] && grid[x][y] == grid[x + 2][y]
-                || (grid[x][y] == BOOSTER_ID && grid[x + 1][y] != 0 && grid[x + 1][y] == grid[x + 2][y])
+                if ((grid[x][y] == BOOSTER_ID && grid[x + 1][y] != 0 && grid[x + 1][y] == grid[x + 2][y])
                 || (grid[x][y] != 0 && grid[x][y] == grid[x + 1][y] && grid[x + 2][y] == BOOSTER_ID)
                 || (grid[x][y] != 0 && grid[x][y] == grid[x + 2][y] && grid[x + 1][y] == BOOSTER_ID)
+                || (grid[x][y] != 0 && grid[x][y] == grid[x + 1][y] && grid[x][y] == grid[x + 2][y])  // normal match
                 ) {
                     toRemove[x][y] = true;
                     toRemove[x + 1][y] = true;
