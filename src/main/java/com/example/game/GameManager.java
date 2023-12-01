@@ -112,6 +112,8 @@ public class GameManager extends Application {
     public void startNewGame(ActionEvent event) {
         try {
             lunchPlayBoard((Stage) ((Node) event.getSource()).getScene().getWindow());
+            ifFileNotExitCreateNew(new File("src/historyScore.txt"));
+            loadHistoryRecord();
             spawn();
         } catch (IOException e) {
             e.printStackTrace(); // Handle the IOException appropriately
@@ -284,6 +286,9 @@ public class GameManager extends Application {
                             mino.detach(x, y);
                         }
                         grid[x][y] = 0;
+                        Platform.runLater(() -> {
+                            calculateScore();
+                        });
                         match++;
                     } else if (match > 0) {
                         int shift = match;
@@ -383,6 +388,11 @@ public class GameManager extends Application {
         if(scoreNum > scoreAchieved){
             scoreAchieved = scoreNum;
             GameUIHelper.updateHistoryScore(scoreAchieved);
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter("src/historyScore.txt"))) {
+                writer.write(String.valueOf(scoreAchieved));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -427,7 +437,6 @@ public class GameManager extends Application {
 
     public void removePiece(final Piece piece) {
         grid[piece.getX()][piece.getY()]--;
-        calculateScore();
     }
     public void clearPiece(final Piece piece) {
         grid[piece.getX()][piece.getY()] = 0;
@@ -562,6 +571,7 @@ public class GameManager extends Application {
             }
         }
         scoreNum = 0;
+        GameUIHelper.updateCurrentScore(scoreNum);
         gc.clearRect(0, 0, GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE);
         minos.clear();
         minoPreview = original.get(new Random().nextInt(original.size())).copy();
@@ -571,9 +581,7 @@ public class GameManager extends Application {
         spawn();
     }
 
-    public void saveGame() {
-        File file = new File("src/load.txt");
-
+    private void ifFileNotExitCreateNew(File file){
         if (!file.exists()) {
             try {
                 // create the file when it does not exist
@@ -584,22 +592,35 @@ public class GameManager extends Application {
                 e.printStackTrace();
             }
         }
+    }
+
+    public void saveGame() {
+        File file = new File("src/load.txt");
+        File scorefile = new File("src/historyScore.txt");
+
+        ifFileNotExitCreateNew(file);
+        ifFileNotExitCreateNew(scorefile);
         JsonFormatter jsonFormatter = new JsonFormatter();
         jsonFormatter.minoPreview = this.minoPreview;
         jsonFormatter.minoInQueue = this.minoInQueue;
         jsonFormatter.scoreNum = this.scoreNum;
-        jsonFormatter.scoreAchieved = this.scoreAchieved;
         jsonFormatter.comboCount = this.comboCount;
         jsonFormatter.level = this.level;
         jsonFormatter.grid = this.grid;
         jsonFormatter.selected = this.selected;
         jsonFormatter.minos = this.minos;
 
-        try (FileOutputStream fileOut = new FileOutputStream("src/load.txt");
-             ObjectOutputStream out = new ObjectOutputStream(fileOut)) {
-             out.writeObject(jsonFormatter);
+    }
+
+    private void loadHistoryRecord() {
+        try (BufferedReader reader = new BufferedReader(new FileReader("src/historyScore.txt"))) {
+            String line = reader.readLine();
+            if (line != null) {
+                scoreAchieved = Integer.parseInt(line);
+                GameUIHelper.updateHistoryScore(scoreAchieved);
+            }
         } catch (IOException e) {
-                e.printStackTrace();
+            e.printStackTrace();
         }
     }
 
@@ -611,7 +632,6 @@ public class GameManager extends Application {
             minoPreview = gameMapper.minoPreview;
             minoInQueue = gameMapper.minoInQueue;
             scoreNum = gameMapper.scoreNum;
-            scoreAchieved = gameMapper.scoreAchieved;
             comboCount = gameMapper.comboCount;
             level = gameMapper.level;
             minos = gameMapper.minos;
@@ -621,6 +641,7 @@ public class GameManager extends Application {
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
+        loadHistoryRecord();
     }
 
     @Override

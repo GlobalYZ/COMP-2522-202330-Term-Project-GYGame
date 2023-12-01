@@ -17,8 +17,6 @@ public class JsonFormatter implements Serializable {
 
     public Integer scoreNum = 0;
 
-    public Integer scoreAchieved = 0;
-
     public Integer comboCount = 0;
 
     public Integer level = 1;

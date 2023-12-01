@@ -21,9 +21,13 @@ import javafx.beans.property.StringProperty;
 
 public final class GameUIHelper {
 
-    public static final Label currentScoreLabel = new Label();
+    public static Label currentScoreLabel = new Label();
 
-    public static final Label historyScoreLabel = new Label();
+    public static Label historyScoreLabel = new Label();
+
+    public static StringProperty scoreProperty;
+
+    public static StringProperty hisScoreProperty;
 
     public static final String backgroundColor = "-fx-background-color: #fee3c5;";
 
@@ -59,12 +63,12 @@ public final class GameUIHelper {
     public static Node createScoreBoard(Integer scoreNum, Integer scoreAchieved) {
         int tileSize = GameManager.TILE_SIZE;
         int gridWidth = GameManager.GRID_WIDTH;
-        HBox scoreBox = new HBox();
+        VBox scoreBox = new VBox();
         scoreBox.setPrefWidth(tileSize * gridWidth);
         scoreBox.setAlignment(Pos.CENTER);
         scoreBox.setPadding(new Insets(10, 0, 20, 0));
-        StringProperty scoreProperty = new SimpleStringProperty("SCORE: " + scoreNum + "   ");
-        StringProperty hisScoreProperty = new SimpleStringProperty("ACHIEVED :" + scoreAchieved);
+        scoreProperty = new SimpleStringProperty("SCORE: " + scoreNum + "   ");
+        hisScoreProperty = new SimpleStringProperty("ACHIEVED :" + scoreAchieved);
         currentScoreLabel.textProperty().bind(scoreProperty);
         historyScoreLabel.textProperty().bind(hisScoreProperty);
         scoreBox.setStyle("-fx-color: #a88d53; -fx-font-size: 28px;-fx-text-alignment: center;");
@@ -73,15 +77,13 @@ public final class GameUIHelper {
     }
 
     public static void updateCurrentScore(Integer scoreNum) {
-        Platform.runLater(() -> {
-            currentScoreLabel.setText("SCORE: " + scoreNum + "   ");
-        });
+        scoreProperty.set("SCORE: " + scoreNum + "\n");
     }
 
     public static void updateHistoryScore(Integer scoreAchieved) {
-        Platform.runLater(() -> {
-            historyScoreLabel.setText("ACHIEVED :" + scoreAchieved);
-        });
+
+        hisScoreProperty.set("ACHIEVED :" + scoreAchieved);
+
     }
 
     public static Node createPreviewBox() {
