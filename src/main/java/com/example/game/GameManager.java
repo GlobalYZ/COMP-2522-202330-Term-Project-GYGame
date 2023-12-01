@@ -36,6 +36,7 @@ import java.io.IOException;
 
 
 
+
 public class GameManager extends Application {
     public static final int TILE_SIZE = 40; // Grace's constant don't delete it.
     public static final int GRID_WIDTH = 10;
@@ -313,6 +314,7 @@ public class GameManager extends Application {
     }
 
     private void boosterMarkRemove(final boolean[][] toRemove, final int tagID) {
+        System.out.println("tag id to delete by nooster" + tagID);
         for (int x = 0; x < GRID_WIDTH; x++) {
             for (int y = GRID_HEIGHT - 1; y >= 0; y--) {
                 if (grid[x][y] == tagID) {
@@ -372,13 +374,18 @@ public class GameManager extends Application {
         minos.forEach(mino -> mino.draw(gc));
     }
 
-//    public void calculateScore(Piece piece) {
-//        if (comboCount > 0) {
-//            scoreNum += 10 * comboCount;
-//        } else {
-//            scoreNum += 10;
-//        }
-//    }
+    public void calculateScore() {
+        if (comboCount > 0) {
+            scoreNum += 10 * comboCount;
+        } else {
+            scoreNum += 10;
+        }
+        GameUIHelper.updateCurrentScore(scoreNum);
+        if(scoreNum > scoreAchieved){
+            scoreAchieved = scoreNum;
+            GameUIHelper.updateHistoryScore(scoreAchieved);
+        }
+    }
 
     private void renderPreviews(){
         Platform.runLater(() -> {
@@ -421,6 +428,7 @@ public class GameManager extends Application {
 
     public void removePiece(final Piece piece) {
         grid[piece.getX()][piece.getY()]--;
+        calculateScore();
     }
     public void clearPiece(final Piece piece) {
         grid[piece.getX()][piece.getY()] = 0;
@@ -502,7 +510,7 @@ public class GameManager extends Application {
                 makeMove(p -> p.move(Direction.LEFT), p -> p.move(Direction.RIGHT), false);
             } else if (e.getCode() == KeyCode.DOWN) {
                 makeMove(p -> p.move(Direction.DOWN), p -> p.move(Direction.UP), true);
-            } else if (e.getCode() == KeyCode.ESCAPE) {
+            } else if (e.getCode() == KeyCode.SPACE) {
                 stopTimer();
                 Dialog<ButtonType> dialog = new Dialog<>();
                 dialog.setTitle("Pause");

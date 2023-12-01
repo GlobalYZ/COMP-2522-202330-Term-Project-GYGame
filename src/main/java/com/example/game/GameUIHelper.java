@@ -1,4 +1,5 @@
 package com.example.game;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 
 import javafx.application.Platform;
@@ -13,8 +14,16 @@ import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 import java.util.ArrayList;
 import java.util.List;
+import javafx.beans.binding.Bindings;
+import javafx.scene.control.Label;
+import javafx.beans.property.StringProperty;
+
 
 public final class GameUIHelper {
+
+    public static final Label currentScoreLabel = new Label();
+
+    public static final Label historyScoreLabel = new Label();
 
     public static final String backgroundColor = "-fx-background-color: #fee3c5;";
 
@@ -54,13 +63,25 @@ public final class GameUIHelper {
         scoreBox.setPrefWidth(tileSize * gridWidth);
         scoreBox.setAlignment(Pos.CENTER);
         scoreBox.setPadding(new Insets(10, 0, 20, 0));
-        Text scoreText = new Text();
-        Text achievedScore = new Text();
-        scoreText.setText("SCORE: " + scoreNum.toString() + "   ");
-        achievedScore.setText("ACHIEVED :" + scoreAchieved.toString());
+        StringProperty scoreProperty = new SimpleStringProperty("SCORE: " + scoreNum + "   ");
+        StringProperty hisScoreProperty = new SimpleStringProperty("ACHIEVED :" + scoreAchieved);
+        currentScoreLabel.textProperty().bind(scoreProperty);
+        historyScoreLabel.textProperty().bind(hisScoreProperty);
         scoreBox.setStyle("-fx-color: #a88d53; -fx-font-size: 28px;-fx-text-alignment: center;");
-        scoreBox.getChildren().addAll(scoreText, achievedScore);
+        scoreBox.getChildren().addAll(currentScoreLabel, historyScoreLabel);
         return scoreBox;
+    }
+
+    public static void updateCurrentScore(Integer scoreNum) {
+        Platform.runLater(() -> {
+            currentScoreLabel.setText("SCORE: " + scoreNum + "   ");
+        });
+    }
+
+    public static void updateHistoryScore(Integer scoreAchieved) {
+        Platform.runLater(() -> {
+            historyScoreLabel.setText("ACHIEVED :" + scoreAchieved);
+        });
     }
 
     public static Node createPreviewBox() {
