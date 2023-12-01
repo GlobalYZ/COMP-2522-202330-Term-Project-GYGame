@@ -282,6 +282,7 @@ public class GameManager extends Application {
                 int match = 0;
                 for (int y = GRID_HEIGHT - 1; y >= 0; y--) {
                     if (toRemove[x][y]) {
+                        System.out.println("Removing: " + grid[x][y] + " at (" + x + ", " + y + ") ");
                         for (Mino mino : minos) {
                             mino.detach(x, y);
                         }
@@ -333,6 +334,7 @@ public class GameManager extends Application {
 
     private boolean[][] checkMatches() {  // return a boolean matrix to represent the matches to remove
         boolean[][] toRemove = new boolean[GRID_WIDTH][GRID_HEIGHT];
+        int tagID;
 
         // Check for vertical matches
         for (int x = 0; x < GRID_WIDTH; x++) {
@@ -340,13 +342,14 @@ public class GameManager extends Application {
                 if ((grid[x][y] != 0 && grid[x][y] == grid[x][y - 1] && grid[x][y] == grid[x][y - 2])
                 || (grid[x][y] == BOOSTER_ID && grid[x][y - 1] != 0 && grid[x][y - 1] == grid[x][y - 2])
                 || (grid[x][y] != 0 && grid[x][y] == grid[x][y - 1] && grid[x][y - 2] == BOOSTER_ID)
-                        || (grid[x][y] != 0 && grid[x][y] == grid[x][y - 2] && grid[x][y - 1] == BOOSTER_ID)) {
+                || (grid[x][y] != 0 && grid[x][y] == grid[x][y - 2] && grid[x][y - 1] == BOOSTER_ID)
+                ) {
                     toRemove[x][y] = true;
                     toRemove[x][y - 1] = true;
                     toRemove[x][y - 2] = true;
                     // TODO check if any of the pieces is a booster
                     if (grid[x][y] == BOOSTER_ID || grid[x][y - 1] == BOOSTER_ID || grid[x][y - 2] == BOOSTER_ID) {
-                        int tagID = grid[x][y] == BOOSTER_ID ? grid[x][y - 1] : grid[x][y];
+                        tagID = grid[x][y] == BOOSTER_ID ? grid[x][y - 1] : grid[x][y];
                         boosterMarkRemove(toRemove, tagID);
                     }
                 }
@@ -359,12 +362,13 @@ public class GameManager extends Application {
                 if (grid[x][y] != 0 && grid[x][y] == grid[x + 1][y] && grid[x][y] == grid[x + 2][y]
                 || (grid[x][y] == BOOSTER_ID && grid[x + 1][y] != 0 && grid[x + 1][y] == grid[x + 2][y])
                 || (grid[x][y] != 0 && grid[x][y] == grid[x + 1][y] && grid[x + 2][y] == BOOSTER_ID)
-                || (grid[x][y] != 0 && grid[x][y] == grid[x + 2][y] && grid[x + 1][y] == BOOSTER_ID)) {
+                || (grid[x][y] != 0 && grid[x][y] == grid[x + 2][y] && grid[x + 1][y] == BOOSTER_ID)
+                ) {
                     toRemove[x][y] = true;
                     toRemove[x + 1][y] = true;
                     toRemove[x + 2][y] = true;
                     if (grid[x][y] == BOOSTER_ID || grid[x + 1][y] == BOOSTER_ID || grid[x + 2][y] == BOOSTER_ID) {
-                        int tagID = grid[x][y] == BOOSTER_ID ? grid[x + 1][y] : grid[x][y];
+                        tagID = grid[x][y] == BOOSTER_ID ? grid[x + 1][y] : grid[x][y];
                         boosterMarkRemove(toRemove, tagID);
                     }
                 }
@@ -518,7 +522,7 @@ public class GameManager extends Application {
                 makeMove(p -> p.move(Direction.LEFT), p -> p.move(Direction.RIGHT), false);
             } else if (e.getCode() == KeyCode.DOWN) {
                 makeMove(p -> p.move(Direction.DOWN), p -> p.move(Direction.UP), true);
-            } else if (e.getCode() == KeyCode.SPACE) {
+            } else if (e.getCode() == KeyCode.ESCAPE) {
                 stopTimer();
                 Dialog<ButtonType> dialog = new Dialog<>();
                 dialog.setTitle("Pause");
