@@ -1,5 +1,4 @@
 package com.example.game;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -113,11 +112,13 @@ public class GameManager extends Application {
     public void startNewGame(ActionEvent event) {
         try {
             lunchPlayBoard((Stage) ((Node) event.getSource()).getScene().getWindow());
+            loadHistoryRecord();
             spawn();
         } catch (IOException e) {
             e.printStackTrace(); // Handle the IOException appropriately
         }
     }
+
 
     @FXML
     public void loadOldGame(ActionEvent event) {
@@ -608,6 +609,18 @@ public void saveGame() {
              out.writeObject(jsonFormatter);
         } catch (IOException e) {
                 e.printStackTrace();
+        }
+    }
+
+    public void loadHistoryRecord(){
+        try (FileInputStream fileIn = new FileInputStream("src/load.txt");
+             ObjectInputStream in = new ObjectInputStream(fileIn)) {
+            JsonFormatter gameMapper = (JsonFormatter) in.readObject();
+            scoreAchieved = gameMapper.scoreAchieved;
+            renderPreviews();
+            GameUIHelper.updateHistoryScore(scoreAchieved);
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
         }
     }
 
