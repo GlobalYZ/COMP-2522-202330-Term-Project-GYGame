@@ -301,8 +301,12 @@ public class GameManager extends Application {
                         // Gravity for the pieces on the left and right
                         gravity(x - 1, y + match, true);
                         gravity(x - 2, y + match, true);
-                        gravity(x + 1, y + match, false);
-                        gravity(x + 2, y + match, false);
+                        if (x + 1 < GRID_WIDTH && !toRemove[x + 1][y + match]) {
+                            gravity(x + 1, y + match, false);
+                        }
+                        if (x + 2 < GRID_WIDTH && !toRemove[x + 2][y + match]) {
+                            gravity(x + 2, y + match, false);
+                        }
                     }
                 }
             }
@@ -310,7 +314,6 @@ public class GameManager extends Application {
             hasMatch = hasMatch(toRemove);
             if (hasMatch) {
                 System.out.println("Combo!");
-                // TODO add combo count or special effect
             }
         }
 
