@@ -299,13 +299,14 @@ public class GameManager extends Application {
                         }
                         dropPiece(x, y, shift);
                         // Gravity for the pieces on the left and right
-                        gravity(x - 1, y + match, true);
-                        gravity(x - 2, y + match, true);
-                        if (x + 1 < GRID_WIDTH && !toRemove[x + 1][y + match]) {
-                            gravity(x + 1, y + match, false);
-                        }
-                        if (x + 2 < GRID_WIDTH && !toRemove[x + 2][y + match]) {
-                            gravity(x + 2, y + match, false);
+                        for (int i = -2; i <= 2; i++) {
+                            if (i == 0) {
+                                continue; // Skip i = 0 since it's not in the original code
+                            }
+                            int newX = x + i;
+                            if (i < 0 || (newX < GRID_WIDTH && !toRemove[newX][y + match])) {
+                                gravity(newX, y + match, i < 0);
+                            }
                         }
                     }
                 }
