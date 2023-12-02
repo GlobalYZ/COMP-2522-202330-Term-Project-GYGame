@@ -1,5 +1,6 @@
 package com.example.game;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import javafx.scene.image.Image;
 
 import java.io.Serializable;
@@ -8,15 +9,21 @@ import java.util.List;
 import java.util.Random;
 
 public class Piece implements Serializable {
+
     private final int distance;
+
     private Direction direction;
 
     private final Tag tag;
 
     private Mino parent;
+
     private boolean isSpecial;
+
     private int x;
+
     private int y;
+
     /**
      * RecycleType.
      */
@@ -28,8 +35,10 @@ public class Piece implements Serializable {
         Glass(14),
         Battery(16),
         Booster(18);
+
+        @JsonProperty("id")
         private final int id;
-        RecycleType(final int id) {
+        RecycleType(@JsonProperty("id") final int id) {
             this.id = id;
         }
         public int tagID() {
@@ -42,8 +51,14 @@ public class Piece implements Serializable {
      */
     public static final class Tag implements Serializable {
 
+        @JsonProperty("imageString")
         private final String imageString;
+
+        @JsonProperty("type")
         public final RecycleType type;
+
+        @JsonProperty("id")
+        public int id;
         /**
          * Constructs an object of type Tag.
          */
@@ -59,6 +74,7 @@ public class Piece implements Serializable {
             Random random = new Random();
             type = recycleTypes.get(random.nextInt(recycleTypes.size()));
             imageString = "file:./src/asset/Image/" + type.name() + ".png";
+            id = getID();
         }
         public RecycleType getType() {
             return type;
@@ -72,7 +88,7 @@ public class Piece implements Serializable {
         }
     }
 
-    public Piece(final int distance, final Direction direction) {
+    public Piece(@JsonProperty("distance") final int distance, @JsonProperty("direction") final Direction direction) {
         this.distance = distance;
         this.direction = direction;
         this.tag = new Tag();
@@ -114,7 +130,4 @@ public class Piece implements Serializable {
     public Piece copy() {
         return new Piece(distance, direction);
     }
-
-
-
 }

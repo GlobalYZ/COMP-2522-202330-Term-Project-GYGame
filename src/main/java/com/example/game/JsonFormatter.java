@@ -23,6 +23,8 @@ public class JsonFormatter implements Serializable {
 
     public int[][] grid;
 
+    public Integer scoreAchieved = 0;
+
     public List<Mino> minos = new ArrayList<>();  // minos on the board
     public Mino selected; // the mino that is going to be moved
     public Mino minoInQueue; // the mino that is going to be selected on the board

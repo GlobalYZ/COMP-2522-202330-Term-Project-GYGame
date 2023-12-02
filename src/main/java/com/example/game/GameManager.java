@@ -1,4 +1,5 @@
 package com.example.game;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -112,8 +113,6 @@ public class GameManager extends Application {
     public void startNewGame(ActionEvent event) {
         try {
             lunchPlayBoard((Stage) ((Node) event.getSource()).getScene().getWindow());
-            ifFileNotExitCreateNew(new File("src/historyScore.txt"));
-            loadHistoryRecord();
             spawn();
         } catch (IOException e) {
             e.printStackTrace(); // Handle the IOException appropriately
@@ -131,10 +130,6 @@ public class GameManager extends Application {
 
             executor.shutdown(); // 记得在不需要时关闭 ExecutorService
             lunchPlayBoard((Stage) ((Node) event.getSource()).getScene().getWindow());
-//            Platform.runLater(()->{
-//                resetGame();
-//                loadGame();
-//            });
         } catch (IOException e) {
             e.printStackTrace(); // Handle the IOException appropriately
         }
@@ -388,11 +383,6 @@ public class GameManager extends Application {
         if(scoreNum > scoreAchieved){
             scoreAchieved = scoreNum;
             GameUIHelper.updateHistoryScore(scoreAchieved);
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter("src/historyScore.txt"))) {
-                writer.write(String.valueOf(scoreAchieved));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
     }
 
@@ -518,7 +508,7 @@ public class GameManager extends Application {
                 makeMove(p -> p.move(Direction.LEFT), p -> p.move(Direction.RIGHT), false);
             } else if (e.getCode() == KeyCode.DOWN) {
                 makeMove(p -> p.move(Direction.DOWN), p -> p.move(Direction.UP), true);
-            } else if (e.getCode() == KeyCode.SPACE) {
+            } else if (e.getCode() == KeyCode.ESCAPE) {
                 stopTimer();
                 Dialog<ButtonType> dialog = new Dialog<>();
                 dialog.setTitle("Pause");
@@ -581,7 +571,10 @@ public class GameManager extends Application {
         spawn();
     }
 
-    private void ifFileNotExitCreateNew(File file){
+
+public void saveGame() {
+        File file = new File("src/load.txt");
+
         if (!file.exists()) {
             try {
                 // create the file when it does not exist
@@ -592,35 +585,22 @@ public class GameManager extends Application {
                 e.printStackTrace();
             }
         }
-    }
-
-    public void saveGame() {
-        File file = new File("src/load.txt");
-        File scorefile = new File("src/historyScore.txt");
-
-        ifFileNotExitCreateNew(file);
-        ifFileNotExitCreateNew(scorefile);
         JsonFormatter jsonFormatter = new JsonFormatter();
         jsonFormatter.minoPreview = this.minoPreview;
         jsonFormatter.minoInQueue = this.minoInQueue;
         jsonFormatter.scoreNum = this.scoreNum;
+        jsonFormatter.scoreAchieved = this.scoreAchieved;
         jsonFormatter.comboCount = this.comboCount;
         jsonFormatter.level = this.level;
         jsonFormatter.grid = this.grid;
         jsonFormatter.selected = this.selected;
         jsonFormatter.minos = this.minos;
 
-    }
-
-    private void loadHistoryRecord() {
-        try (BufferedReader reader = new BufferedReader(new FileReader("src/historyScore.txt"))) {
-            String line = reader.readLine();
-            if (line != null) {
-                scoreAchieved = Integer.parseInt(line);
-                GameUIHelper.updateHistoryScore(scoreAchieved);
-            }
+        try (FileOutputStream fileOut = new FileOutputStream("src/load.txt");
+             ObjectOutputStream out = new ObjectOutputStream(fileOut)) {
+             out.writeObject(jsonFormatter);
         } catch (IOException e) {
-            e.printStackTrace();
+                e.printStackTrace();
         }
     }
 
@@ -632,17 +612,20 @@ public class GameManager extends Application {
             minoPreview = gameMapper.minoPreview;
             minoInQueue = gameMapper.minoInQueue;
             scoreNum = gameMapper.scoreNum;
+            scoreAchieved = gameMapper.scoreAchieved;
             comboCount = gameMapper.comboCount;
             level = gameMapper.level;
             minos = gameMapper.minos;
             selected = gameMapper.selected;
             grid = gameMapper.grid;
             renderPreviews();
+            GameUIHelper.updateCurrentScore(scoreNum);
+            GameUIHelper.updateHistoryScore(scoreAchieved);
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
-        loadHistoryRecord();
     }
+
 
     @Override
     public void start(Stage stage) throws IOException {

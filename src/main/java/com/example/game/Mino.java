@@ -1,4 +1,5 @@
 package com.example.game;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 
@@ -9,12 +10,16 @@ import java.util.List;
 import static com.example.game.GameManager.TILE_SIZE;
 
 public class Mino implements Serializable {
+
+
     private int x;
+
     private int y;
+
     private final List<Piece> pieces;
 
 
-    public Mino(final Piece... pieces) {
+    public Mino(@JsonProperty("pieces") final Piece... pieces) {
         this.pieces = new ArrayList<>(Arrays.asList(pieces));
 
         for (Piece piece : this.pieces) {
