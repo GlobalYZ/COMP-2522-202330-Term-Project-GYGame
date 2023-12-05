@@ -1,21 +1,33 @@
 package com.example.game;
+
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
+import javafx.scene.media.Media;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
+import javafx.scene.media.MediaPlayer;
+
+import javax.sound.sampled.*;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -24,16 +36,6 @@ import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
-
-import javafx.scene.Parent;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.HBox;
-import javafx.scene.image.Image;
-import javafx.geometry.Pos;
-
-
-import java.io.IOException;
-
 
 
 
@@ -59,6 +61,10 @@ public class GameManager extends Application {
     private AnimationTimer loadtimer;
 
     private double loadtime;
+
+    public MediaPlayer interactMediaPlayer;
+
+    public MediaPlayer deletionMediaPlayer;
 
 
 
@@ -111,7 +117,7 @@ public class GameManager extends Application {
     @FXML
     public void startNewGame(ActionEvent event) {
         try {
-            lunchPlayBoard((Stage) ((Node) event.getSource()).getScene().getWindow());
+            launchPlayBoard((Stage) ((Node) event.getSource()).getScene().getWindow());
             loadHistoryRecord();
             spawn();
         } catch (IOException e) {
@@ -130,7 +136,7 @@ public class GameManager extends Application {
             });
 
             executor.shutdown(); // 记得在不需要时关闭 ExecutorService
-            lunchPlayBoard((Stage) ((Node) event.getSource()).getScene().getWindow());
+            launchPlayBoard((Stage) ((Node) event.getSource()).getScene().getWindow());
         } catch (IOException e) {
             e.printStackTrace(); // Handle the IOException appropriately
         }
@@ -284,6 +290,9 @@ public class GameManager extends Application {
                         }
                         grid[x][y] = 0;
                         Platform.runLater(() -> {
+                            interactMediaPlayer.stop();
+                            deletionMediaPlayer.stop();
+                            deletionMediaPlayer.play();
                             calculateScore();
                         });
                         match++;
@@ -419,7 +428,7 @@ public class GameManager extends Application {
             placePiece(piece);
         }
         if (!isValidateState()) {
-            System.out.println("Game Over");
+            launchPopUp("Game Over", "Your score is " + scoreNum + ". Do you want to restart or leave?", true);
         }
     }
     public void placeTagID(final Piece piece) {
@@ -448,7 +457,63 @@ public class GameManager extends Application {
         }
     }
 
-    public void lunchPlayBoard(Stage stage) throws IOException {
+    private void launchPopUp(String title, String content, boolean isGameOver) {
+        stopTimer();
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle(title);
+        dialog.setContentText(content);
+
+        if(!isGameOver){
+            ButtonType okButtonType = new ButtonType("RESUME", ButtonBar.ButtonData.OK_DONE);
+            ButtonType cancelButtonType = new ButtonType("RESTART", ButtonBar.ButtonData.FINISH);
+            ButtonType leaveButtonType = new ButtonType("LEAVE", ButtonBar.ButtonData.FINISH);
+            dialog.getDialogPane().getButtonTypes().addAll(okButtonType, cancelButtonType,leaveButtonType);
+        }else{
+            ButtonType cancelButtonType = new ButtonType("RESTART", ButtonBar.ButtonData.FINISH);
+            ButtonType leaveButtonType = new ButtonType("LEAVE", ButtonBar.ButtonData.FINISH);
+            dialog.getDialogPane().getButtonTypes().addAll(cancelButtonType,leaveButtonType);
+        }
+
+        dialog.getDialogPane().getChildren().stream().forEach(node -> {
+            node.setStyle("-fx-text-alignment: center;-fx-font-size: 20px;" + GameUIHelper.backgroundColor);
+        });
+
+        // Add a CSS stylesheet to the dialog pane
+        dialog.getDialogPane().getStylesheets().add(
+                getClass().getResource("overWrite.css").toExternalForm()
+        );
+
+        if(!isGameOver){
+            // show dialog and wait for response
+            dialog.showAndWait().ifPresent(response -> {
+                if (response.getText() == "RESUME") {
+                    System.out.println("User clicked OK");
+                } else if (response.getText() == "LEAVE") {
+                    System.exit(0);
+                } else if (response.getText() == "RESTART") {
+                    resetGame();
+                }
+            });
+        }else{
+            dialog.showAndWait().ifPresent(response -> {
+                if (response.getText() == "LEAVE") {
+                    //if game over, clear load.txt.
+                    File file = new File("src/load.txt");
+                    try {
+                        file.delete();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    System.exit(0);
+                } else if (response.getText() == "RESTART") {
+                    resetGame();
+                }
+            });
+        }
+        timer.start();
+    }
+
+    public void launchPlayBoard(Stage stage) throws IOException {
 
         // Create the root node (for example, an AnchorPane)
         root = new AnchorPane();
@@ -507,6 +572,9 @@ public class GameManager extends Application {
         // keyboard event
         scene.setOnKeyPressed(e -> {
             if (e.getCode() == KeyCode.UP) {
+                deletionMediaPlayer.stop();
+                interactMediaPlayer.stop();
+                interactMediaPlayer.play();
                 makeMove(Mino::rotate, Mino::rotateBack, false);
             } else if (e.getCode() == KeyCode.RIGHT) {
                 makeMove(p -> p.move(Direction.RIGHT), p -> p.move(Direction.LEFT), false);
@@ -550,14 +618,18 @@ public class GameManager extends Application {
                 });
 
             }
-
-
             render();
         });
         stage.setScene(scene);
         stage.setMaximized(true);
         stage.setTitle("EcoStack");
         stage.show();
+        String interactFile = "src/asset/sound/UI_interact.mp3"; // 替换为你的音乐文件路径
+        Media interactMedia = new Media(new File(interactFile).toURI().toString());
+        interactMediaPlayer = new MediaPlayer(interactMedia);
+        String deletionFile = "src/asset/sound/deletion.mp3"; // 替换为你的音乐文件路径
+        Media deletionMedia = new Media(new File(deletionFile).toURI().toString());
+        deletionMediaPlayer = new MediaPlayer(deletionMedia);
     }
 
     public void resetGame(){
@@ -611,15 +683,22 @@ public void saveGame() {
     }
 
     public void loadHistoryRecord(){
-        try (FileInputStream fileIn = new FileInputStream("src/load.txt");
-             ObjectInputStream in = new ObjectInputStream(fileIn)) {
-            JsonFormatter gameMapper = (JsonFormatter) in.readObject();
-            scoreAchieved = gameMapper.scoreAchieved;
-            renderPreviews();
-            GameUIHelper.updateHistoryScore(scoreAchieved);
-        } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
+
+        File file = new File("src/load.txt");
+        if (file.length() == 0) {
+            scoreAchieved = 0;
+        } else {
+            try (FileInputStream fileIn = new FileInputStream("src/load.txt");
+                 ObjectInputStream in = new ObjectInputStream(fileIn)) {
+                JsonFormatter gameMapper = (JsonFormatter) in.readObject();
+                scoreAchieved = gameMapper.scoreAchieved;
+                renderPreviews();
+                GameUIHelper.updateHistoryScore(scoreAchieved);
+            } catch (IOException | ClassNotFoundException e) {
+                e.printStackTrace();
+            }
         }
+
     }
 
     public void loadGame() {
@@ -665,7 +744,20 @@ public void saveGame() {
         });
     }
 
+
     public static void main(String[] args) {
+        String musicFile = "src/asset/sound/bgm.wav"; // 相对路径，假设音频文件与 Java 源代码在同一目录下
+        try {
+            File audioFile = new File(musicFile);
+            AudioInputStream audioStream = AudioSystem.getAudioInputStream(audioFile);
+
+            Clip clip = AudioSystem.getClip();
+            clip.open(audioStream);
+
+            clip.loop(Clip.LOOP_CONTINUOUSLY); // Loop to play BGM
+        } catch (UnsupportedAudioFileException | LineUnavailableException | IOException e) {
+            e.printStackTrace();
+        }
         launch();
     }
 }
