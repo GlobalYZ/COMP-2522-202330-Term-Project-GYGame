@@ -421,7 +421,7 @@ public class GameManager extends Application {
             placePiece(piece);
         }
         if (!isValidateState()) {
-            System.out.println("Game Over");
+            launchPopUp("Game Over", "Your score is " + scoreNum + ". Do you want to restart or leave?", true);
         }
     }
     public void placeTagID(final Piece piece) {
@@ -448,6 +448,62 @@ public class GameManager extends Application {
         if (timer != null) {
             timer.stop();
         }
+    }
+
+    private void launchPopUp(String title, String content, boolean isGameOver) {
+        stopTimer();
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle(title);
+        dialog.setContentText(content);
+
+        if(!isGameOver){
+            ButtonType okButtonType = new ButtonType("RESUME", ButtonBar.ButtonData.OK_DONE);
+            ButtonType cancelButtonType = new ButtonType("RESTART", ButtonBar.ButtonData.FINISH);
+            ButtonType leaveButtonType = new ButtonType("LEAVE", ButtonBar.ButtonData.FINISH);
+            dialog.getDialogPane().getButtonTypes().addAll(okButtonType, cancelButtonType,leaveButtonType);
+        }else{
+            ButtonType cancelButtonType = new ButtonType("RESTART", ButtonBar.ButtonData.FINISH);
+            ButtonType leaveButtonType = new ButtonType("LEAVE", ButtonBar.ButtonData.FINISH);
+            dialog.getDialogPane().getButtonTypes().addAll(cancelButtonType,leaveButtonType);
+        }
+
+        dialog.getDialogPane().getChildren().stream().forEach(node -> {
+            node.setStyle("-fx-text-alignment: center;-fx-font-size: 20px;" + GameUIHelper.backgroundColor);
+        });
+
+        // Add a CSS stylesheet to the dialog pane
+        dialog.getDialogPane().getStylesheets().add(
+                getClass().getResource("overWrite.css").toExternalForm()
+        );
+
+        if(!isGameOver){
+            // show dialog and wait for response
+            dialog.showAndWait().ifPresent(response -> {
+                if (response.getText() == "RESUME") {
+                    System.out.println("User clicked OK");
+                } else if (response.getText() == "LEAVE") {
+                    System.exit(0);
+                } else if (response.getText() == "RESTART") {
+                    resetGame();
+                }
+            });
+        }else{
+            dialog.showAndWait().ifPresent(response -> {
+                if (response.getText() == "LEAVE") {
+                    //if game over, clear load.txt.
+                    File file = new File("src/load.txt");
+                    try {
+                        file.delete();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    System.exit(0);
+                } else if (response.getText() == "RESTART") {
+                    resetGame();
+                }
+            });
+        }
+        timer.start();
     }
 
     public void lunchPlayBoard(Stage stage) throws IOException {
@@ -517,40 +573,7 @@ public class GameManager extends Application {
             } else if (e.getCode() == KeyCode.DOWN) {
                 makeMove(p -> p.move(Direction.DOWN), p -> p.move(Direction.UP), true);
             } else if (e.getCode() == KeyCode.ESCAPE) {
-                stopTimer();
-                Dialog<ButtonType> dialog = new Dialog<>();
-                dialog.setTitle("Pause");
-                dialog.setContentText("Do you want to restart the game or save & leave?");
-
-                ButtonType okButtonType = new ButtonType("RESUME", ButtonBar.ButtonData.OK_DONE);
-                ButtonType cancelButtonType = new ButtonType("RESTART", ButtonBar.ButtonData.FINISH);
-                ButtonType leaveButtonType = new ButtonType("LEAVE", ButtonBar.ButtonData.CANCEL_CLOSE);
-
-
-                // ADD BUTTONS
-                dialog.getDialogPane().getButtonTypes().addAll(okButtonType, cancelButtonType,leaveButtonType);
-                dialog.getDialogPane().getChildren().stream().forEach(node -> {
-                    node.setStyle("-fx-text-alignment: center;-fx-font-size: 20px;" + GameUIHelper.backgroundColor);
-                });
-
-                // Add a CSS stylesheet to the dialog pane
-                dialog.getDialogPane().getStylesheets().add(
-                        getClass().getResource("overWrite.css").toExternalForm()
-                );
-
-
-                // show dialog and wait for response
-                dialog.showAndWait().ifPresent(response -> {
-                    if (response.getText() == "RESUME") {
-                        System.out.println("User clicked OK");
-                    } else if (response.getText() == "LEAVE") {
-                        stage.close();
-                    } else if (response.getText() == "RESTART") {
-                        resetGame();
-                    }
-                    timer.start();
-                });
-
+                launchPopUp("Pause", "Do you want to resume or save & leave?", false);
             }
 
 
@@ -613,15 +636,22 @@ public void saveGame() {
     }
 
     public void loadHistoryRecord(){
-        try (FileInputStream fileIn = new FileInputStream("src/load.txt");
-             ObjectInputStream in = new ObjectInputStream(fileIn)) {
-            JsonFormatter gameMapper = (JsonFormatter) in.readObject();
-            scoreAchieved = gameMapper.scoreAchieved;
-            renderPreviews();
-            GameUIHelper.updateHistoryScore(scoreAchieved);
-        } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
+
+        File file = new File("src/load.txt");
+        if (file.length() == 0) {
+            scoreAchieved = 0;
+        } else {
+            try (FileInputStream fileIn = new FileInputStream("src/load.txt");
+                 ObjectInputStream in = new ObjectInputStream(fileIn)) {
+                JsonFormatter gameMapper = (JsonFormatter) in.readObject();
+                scoreAchieved = gameMapper.scoreAchieved;
+                renderPreviews();
+                GameUIHelper.updateHistoryScore(scoreAchieved);
+            } catch (IOException | ClassNotFoundException e) {
+                e.printStackTrace();
+            }
         }
+
     }
 
     public void loadGame() {
