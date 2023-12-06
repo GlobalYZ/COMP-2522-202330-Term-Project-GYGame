@@ -296,31 +296,22 @@ public class GameManager extends Application {
     private void checkAndRemove() {
         boolean[][] toRemove = checkMatches();
         boolean hasMatch = hasMatch(toRemove);
-        int count = 0;
+        int counter = 0;
         while (hasMatch) {
             for (int x = 0; x < GRID_WIDTH; x++) {
                 int match = 0;
                 for (int y = GRID_HEIGHT - 1; y >= 0; y--) {
                     if (toRemove[x][y]) {
+
                         System.out.println("Removing: " + grid[x][y] + " at (" + x + ", " + y + ") ");
                         for (Mino mino : minos) {
                             mino.detach(x, y);
                         }
                         grid[x][y] = 0;
-                        deletionMediaPlayer.stop();
-                        deletionMediaPlayer.play();
-                        if(count > 1){
-                            ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
 
-                            // define the second thread
-                            executor.schedule(() -> {
-                                deletionMediaPlayer.stop();
-                                deletionMediaPlayer.play();
-                            }, 600, TimeUnit.MILLISECONDS);
-                            // close executor
-                            executor.shutdown();
-                        }
                         Platform.runLater(() -> {
+                            deletionMediaPlayer.stop();
+                            deletionMediaPlayer.play();
                             calculateScore();
                         });
                         match++;
@@ -343,13 +334,23 @@ public class GameManager extends Application {
                         }
                     }
                 }
-                count++;
             }
             toRemove = checkMatches();
             hasMatch = hasMatch(toRemove);
             if (hasMatch) {
+                counter ++;
                 System.out.println("Combo!");
             }
+        }
+        if(counter > 0){
+            ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+            for(int z=0;z<counter;z++){
+                executor.schedule(() -> {
+                    deletionMediaPlayer.stop();
+                    deletionMediaPlayer.play();
+                }, 600*(z+1), TimeUnit.MILLISECONDS);
+            }
+            executor.shutdown();
         }
 
         minoInQueue = minoPreview;  // overwrite the going-to-be-selected mino by the previous preview mino
