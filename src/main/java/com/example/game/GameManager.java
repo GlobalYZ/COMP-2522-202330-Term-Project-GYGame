@@ -48,8 +48,9 @@ import java.util.function.Consumer;
  * @version 2023
  */
 public class GameManager extends Application implements PuzzleGame {
-
-
+    private static final double TIME_ELAPSED = 0.03;
+    private double timeThreshold = 1; // the time threshold refresh for the game;
+    private boolean levelUp = false;
     private GraphicsContext gc;
 
     private double time;
@@ -163,11 +164,15 @@ public class GameManager extends Application implements PuzzleGame {
         timer = new AnimationTimer() {
             @Override
             public void handle(final long now) {
-                time += 0.03;
-                if (time >= 0.9) {
+                time += TIME_ELAPSED;
+                if (time >= timeThreshold) {
                     if (selected.getPieces() != null) {
                         update();
                         render();
+                        if (levelUp) {
+                            timeThreshold -= 0.1;
+                            levelUp = false;
+                        }
                     }
                     time = 0;
                 }
@@ -176,7 +181,7 @@ public class GameManager extends Application implements PuzzleGame {
         AnimationTimer loadTimer = new AnimationTimer() {
             @Override
             public void handle(final long now) {
-                loadTime += 0.03;
+                loadTime += TIME_ELAPSED;
                 if (loadTime >= 5) {
                     saveGame();
                     loadTime = 0;
@@ -459,6 +464,7 @@ public class GameManager extends Application implements PuzzleGame {
         final int base = 100;
         if (scoreNum >= base * level) {
             level++;
+            levelUp = true;
             GameUIHelper.updateLv(level);
             scoreNum = 0;
         }
