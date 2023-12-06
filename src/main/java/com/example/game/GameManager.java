@@ -35,6 +35,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 
@@ -266,9 +268,24 @@ public class GameManager extends Application {
         }
     }
     private boolean hasMatch(final boolean[][] toRemove) {
+        // deletion sound
         for (int x = 0; x < GRID_WIDTH; x++) {
             for (int y = GRID_HEIGHT - 1; y >= 0; y--) {
                 if (toRemove[x][y]) {
+                    // deletion sound
+//                    ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+//
+//                    // define the second thread
+//                    executor.schedule(() -> {
+//
+//                       deletionMediaPlayer.stop();
+//                       deletionMediaPlayer.play();
+//
+//                    }, 600, TimeUnit.MILLISECONDS);
+//
+//                    // close executor
+//                    executor.shutdown();
+
                     return true;
                 }
             }
@@ -279,6 +296,7 @@ public class GameManager extends Application {
     private void checkAndRemove() {
         boolean[][] toRemove = checkMatches();
         boolean hasMatch = hasMatch(toRemove);
+        int count = 0;
         while (hasMatch) {
             for (int x = 0; x < GRID_WIDTH; x++) {
                 int match = 0;
@@ -289,10 +307,20 @@ public class GameManager extends Application {
                             mino.detach(x, y);
                         }
                         grid[x][y] = 0;
+                        deletionMediaPlayer.stop();
+                        deletionMediaPlayer.play();
+                        if(count > 1){
+                            ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+
+                            // define the second thread
+                            executor.schedule(() -> {
+                                deletionMediaPlayer.stop();
+                                deletionMediaPlayer.play();
+                            }, 600, TimeUnit.MILLISECONDS);
+                            // close executor
+                            executor.shutdown();
+                        }
                         Platform.runLater(() -> {
-                            interactMediaPlayer.stop();
-                            deletionMediaPlayer.stop();
-                            deletionMediaPlayer.play();
                             calculateScore();
                         });
                         match++;
@@ -315,6 +343,7 @@ public class GameManager extends Application {
                         }
                     }
                 }
+                count++;
             }
             toRemove = checkMatches();
             hasMatch = hasMatch(toRemove);
@@ -390,12 +419,22 @@ public class GameManager extends Application {
         minos.forEach(mino -> mino.draw(gc));
     }
 
+    private void levelupIfNeed(){
+        final int base = 100;
+        if(scoreNum >= base * level){
+            level++;
+            GameUIHelper.updateLv(level);
+            scoreNum = 0;
+        }
+    }
+
     public void calculateScore() {
         if (comboCount > 0) {
             scoreNum += 10 * comboCount;
         } else {
             scoreNum += 10;
         }
+        levelupIfNeed();
         GameUIHelper.updateCurrentScore(scoreNum);
         if(scoreNum > scoreAchieved){
             scoreAchieved = scoreNum;

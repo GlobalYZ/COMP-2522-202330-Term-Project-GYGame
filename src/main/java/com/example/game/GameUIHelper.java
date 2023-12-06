@@ -29,6 +29,8 @@ public final class GameUIHelper {
 
     public static StringProperty hisScoreProperty;
 
+    public static StringProperty levelProperty;
+
     public static final String backgroundColor = "-fx-background-color: #fee3c5;";
 
 
@@ -106,15 +108,20 @@ public final class GameUIHelper {
     public static Node createLvBox(Integer level) {
         int tileSize = GameManager.TILE_SIZE;
         FlowPane LvBox = new FlowPane();
-        Text LvText = new Text();
-        LvText.setText("LV" + level.toString());
-        LvText.setStyle("-fx-font-size: 20px;-fx-text-alignment: center;-fx-color: #a88d53;");
+        levelProperty = new SimpleStringProperty("LV" + level.toString());
+        Label LvLabel = new Label();
+        LvLabel.textProperty().bind(levelProperty);
+        LvLabel.setStyle("-fx-font-size: 20px;-fx-text-alignment: center;-fx-color: #a88d53;");
         LvBox.setAlignment(Pos.CENTER);
         LvBox.setMaxWidth(tileSize+10);
         LvBox.setMinHeight(tileSize+10);
         LvBox.setStyle(boxStyle);
-        LvBox.getChildren().add(LvText);
+        LvBox.getChildren().add(LvLabel);
         return LvBox;
+    }
+
+    public static void updateLv(Integer lv){
+        levelProperty.set("LV" + lv);
     }
 
     public static Button createGeneralButton(String context){
