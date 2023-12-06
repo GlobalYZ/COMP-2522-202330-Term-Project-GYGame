@@ -1,10 +1,9 @@
-# COMP-2522-202330-Term-Project-GYGame
-
 # EcoStack
 > EcoStack is a puzzle game with an environmental twist. The player's goal is to manage waste by recycling and composting,
 aligning it with ecological themes. It serves a social purpose by raising awareness about recycling and waste management.
 > 
-> Live demo [_here_](https://www.example.com).
+
+[//]: # (> Live demo [_here_]&#40;https://www.example.com&#41;.)
 
 ## Table of Contents
 * [General Info](#general-information)
@@ -44,16 +43,15 @@ The game gradually speeds up, increasing the difficulty as time goes on.
 - Jackson 20
 
 
-## Features
-List the ready features here:
-- Awesome feature 1
-- Awesome feature 2
-- Awesome feature 3
+## Game Guide
+- Use &#8592; &#8595; &#8594; to move the waste
+- Use &#8593; to rotate the waste
+- Use ```Esc``` to pause the game, and then you can choose to restart or resume the game
+- The game is ```auto-saved```, you can continue the game after you close the game
 
 
 ## Screenshots
-![Example screenshot](./img/screenshot.png)
-<!-- If you have screenshots you'd like to share, include them here. -->
+![Mid-game screenshot](./src/asset/Image/Screenshot.png)
 
 
 ## Setting Up the Project
@@ -87,35 +85,9 @@ Navigate to the directory where you cloned the project, select the root director
 4. Navigate to the directory where you installed JavaFX, select the ```lib``` folder, and click ```OK```.
 
 
-## Usage
-How does one go about using it?
-Provide various use cases and code examples here.
-
-`write-your-code-here`
-
-
 ## Project Status
-Project is: _in progress_ / _complete_ / _no longer being worked on_. If you are no longer working on it, provide reasons why.
-
-
-## Room for Improvement
-Include areas you believe need improvement / could be improved. Also add TODOs for future development.
-
-Room for improvement:
-- Improvement to be done 1
-- Improvement to be done 2
-
-To do:
-- Feature to be added 1
-- Feature to be added 2
-
-
-## Acknowledgements
-Give credit here.
-- This project was inspired by...
-- This project was based on [this tutorial](https://www.example.com).
-- Many thanks to...
+Project is: _in final testing_ /
 
 
 ## Contact
-Created by [@flynerdpl](https://www.flynerd.pl/) - feel free to contact me!
+Created by [Grace Su]() & [Muyang Li]()- feel free to contact us!
