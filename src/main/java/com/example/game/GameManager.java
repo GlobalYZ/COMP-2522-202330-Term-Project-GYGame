@@ -49,74 +49,41 @@ import java.util.function.Consumer;
  */
 public class GameManager extends Application implements PuzzleGame {
 
-    /**
-     * The style of the box.
-     */
-    @SuppressWarnings("checkstyle:VisibilityModifier")
+
     private GraphicsContext gc;
-    /**
-     * The style of the box.
-     */
+
     private double time;
-    /**
-     * The style of the box.
-     */
+
     private AnchorPane root;
-    /**
-     * The style of the box.
-     */
+
     private Integer scoreNum = 0;
     /**
      * The style of the box.
      */
     private Integer scoreAchieved = 0;
-    /**
-     * The style of the box.
-     */
+
     private Integer comboCount = 0;
-    /**
-     * The style of the box.
-     */
+
     private Integer level = 1;
-    /**
-     * The style of the box.
-     */
+
     private AnimationTimer timer;
-    /**
-     * The style of the box.
-     */
+
     private double loadTime;
-    /**
-     * The style of the box.
-     */
+
     private MediaPlayer interactMediaPlayer;
-    /**
-     * The style of the box.
-     */
+
     private MediaPlayer deletionMediaPlayer;
-    /**
-     * The grid of the box.
-     */
+
     private int[][] grid = new int[GRID_WIDTH][GRID_HEIGHT];
-    /**
-     * The list of the original Mino to copy from.
-     */
+
     private final List<Mino> original = new ArrayList<>();  // initial minos collection
-    /**
-     * The list of the minos on the board.
-     */
+
     private List<Mino> minos = new ArrayList<>();  // minos on the board
-    /**
-     * The mino that is going to be moved.
-     */
+
     private Mino selected; // the mino that is going to be moved
-    /**
-     * The mino that is going to be selected on the board.
-     */
+
     private Mino minoInQueue; // the mino that is going to be selected on the board
-    /**
-     * The mino that is going to be placed on the board.
-     */
+
     private Mino minoPreview; // the mino that is going to be placed on the board
 
     /**
