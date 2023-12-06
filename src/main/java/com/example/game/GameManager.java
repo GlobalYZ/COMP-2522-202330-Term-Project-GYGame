@@ -193,31 +193,26 @@ public class GameManager extends Application implements PuzzleGame {
      * set and start render timer and load timer for the game.
      */
     private void setTimers() {
-
-        final double runFreq = 0.03;
-        final double saveFreq = 5;
-        final double renderFreq = 0.9;
-        final int zero = 0;
         timer = new AnimationTimer() {
             @Override
             public void handle(final long now) {
-                time += runFreq;
-                if (time >= renderFreq) {
+                time += 0.03;
+                if (time >= 0.9) {
                     if (selected.getPieces() != null) {
                         update();
                         render();
                     }
-                    time = zero;
+                    time = 0;
                 }
             }
         };
         AnimationTimer loadTimer = new AnimationTimer() {
             @Override
             public void handle(final long now) {
-                loadTime += runFreq;
-                if (loadTime >= saveFreq) {
+                loadTime += 0.03;
+                if (loadTime >= 5) {
                     saveGame();
-                    loadTime = zero;
+                    loadTime = 0;
                 }
             }
 
@@ -438,7 +433,7 @@ public class GameManager extends Application implements PuzzleGame {
         }
     }
 
-    @SuppressWarnings("checkstyle:AvoidInlineConditionals")
+
     private boolean[][] checkMatches() {  // return a boolean matrix to represent the matches to remove
         boolean[][] toRemove = new boolean[GRID_WIDTH][GRID_HEIGHT];
         int tagID;
@@ -528,7 +523,9 @@ public class GameManager extends Application implements PuzzleGame {
             if (targetNode == null) {
                 throw new NullPointerException("cannot find child node fx:id for argument: preview");
             } else {
-                minoPreview.getPieces().forEach(p -> elements.add(GameUIHelper.generatePreviewElement(p.getTag().getImageString(), TILE_SIZE)));
+                minoPreview.getPieces().forEach(p -> elements.add(
+                        GameUIHelper.generatePreviewElement(p.getTag().getImageString(), TILE_SIZE))
+                );
                 ((VBox) targetNode).getChildren().clear();
                 ((VBox) targetNode).getChildren().addAll(elements);
             }
@@ -731,7 +728,9 @@ public class GameManager extends Application implements PuzzleGame {
 
                 // ADD BUTTONS
                 dialog.getDialogPane().getButtonTypes().addAll(okButtonType, cancelButtonType, leaveButtonType);
-                dialog.getDialogPane().getChildren().forEach(node -> node.setStyle("-fx-text-alignment: center;-fx-font-size: 20px;" + GameUIHelper.backgroundColor));
+                dialog.getDialogPane().getChildren().forEach(node -> node.setStyle(
+                        "-fx-text-alignment: center;-fx-font-size: 20px;" + GameUIHelper.backgroundColor)
+                );
 
                 // Add a CSS stylesheet to the dialog pane
                 dialog.getDialogPane().getStylesheets().add(
