@@ -1,11 +1,48 @@
 package com.example.game;
 
-abstract class PuzzleGame {
-    public static final int TILE_SIZE = 40; // Grace's constant don't delete it.
-    public static final int GRID_WIDTH = 10;
-    public static final int GRID_HEIGHT = 14;
+interface PuzzleGame {
 
-    public static final String boxStyle = "-fx-background-color: #fee3c5;-fx-border-color: #000000;-fx-border-width: 2px;";
+    /**
+     * The unique ID for the booster.
+     */
+    int BOOSTER_ID = 18;
+    /**
+     * The size of the tile.
+     */
+    int TILE_SIZE = 40;
+    /**
+     * The width of the grid.
+     */
+    int GRID_WIDTH = 10;
+    /**
+     * The height of the grid.
+     */
+    int GRID_HEIGHT = 16;
+
+    /**
+     * Level up if user reach the designed score.
+     */
+    void levelUpIfNeed();
+
+    /**
+     * calculate the score.
+     */
+    void calculateScore();
+
+    /**
+     * Reset the game.
+     */
+    void resetGame();
+
+    /**
+     * Save the game.
+     */
+    void saveGame();
+
+    /**
+     * Load the game.
+     */
+    void loadGame();
 
 
 

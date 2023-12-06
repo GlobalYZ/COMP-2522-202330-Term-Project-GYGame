@@ -1,5 +1,5 @@
-package com.example.game;
 
+package com.example.game;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -32,6 +32,7 @@ import javax.sound.sampled.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -40,47 +41,87 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 
+/**
+ * A Game Manager class that controls the game logic.
+ *
+ * @author Muyang Li
+ * @version 2023
+ */
+public class GameManager extends Application implements PuzzleGame {
 
-public class GameManager extends Application {
-    public static final int BOOSTER_ID = 18;
-    public static final int TILE_SIZE = 40; // Grace's constant don't delete it.
-    public static final int GRID_WIDTH = 10;
-    public static final int GRID_HEIGHT = 16;
-    public GraphicsContext gc;
+    /**
+     * The style of the box.
+     */
+    @SuppressWarnings("checkstyle:VisibilityModifier")
+    private GraphicsContext gc;
+    /**
+     * The style of the box.
+     */
     private double time;
-
+    /**
+     * The style of the box.
+     */
     private AnchorPane root;
-
+    /**
+     * The style of the box.
+     */
     private Integer scoreNum = 0;
-
+    /**
+     * The style of the box.
+     */
     private Integer scoreAchieved = 0;
-
+    /**
+     * The style of the box.
+     */
     private Integer comboCount = 0;
-
+    /**
+     * The style of the box.
+     */
     private Integer level = 1;
-
+    /**
+     * The style of the box.
+     */
     private AnimationTimer timer;
-    private AnimationTimer loadtimer;
-
-    private double loadtime;
-
-    public MediaPlayer interactMediaPlayer;
-
-    public MediaPlayer deletionMediaPlayer;
-
-
-
+    /**
+     * The style of the box.
+     */
+    private double loadTime;
+    /**
+     * The style of the box.
+     */
+    private MediaPlayer interactMediaPlayer;
+    /**
+     * The style of the box.
+     */
+    private MediaPlayer deletionMediaPlayer;
+    /**
+     * The grid of the box.
+     */
     private int[][] grid = new int[GRID_WIDTH][GRID_HEIGHT];
-
-
+    /**
+     * The list of the original Mino to copy from.
+     */
     private final List<Mino> original = new ArrayList<>();  // initial minos collection
+    /**
+     * The list of the minos on the board.
+     */
     private List<Mino> minos = new ArrayList<>();  // minos on the board
+    /**
+     * The mino that is going to be moved.
+     */
     private Mino selected; // the mino that is going to be moved
+    /**
+     * The mino that is going to be selected on the board.
+     */
     private Mino minoInQueue; // the mino that is going to be selected on the board
+    /**
+     * The mino that is going to be placed on the board.
+     */
     private Mino minoPreview; // the mino that is going to be placed on the board
 
-
-
+    /**
+     * Generate the list of basic minos.
+     */
     public void generateBasicMinos() {
         //0
         original.add(new Mino(new Piece(0, Direction.DOWN)));
@@ -115,9 +156,13 @@ public class GameManager extends Application {
         // Will adjust the code after testing the basic minos
     }
 
-
+    /**
+     * Start new game click event.
+     *
+     * @param event the event
+     */
     @FXML
-    public void startNewGame(ActionEvent event) {
+    public void startNewGame(final ActionEvent event) {
         try {
             launchPlayBoard((Stage) ((Node) event.getSource()).getScene().getWindow());
             loadHistoryRecord();
@@ -127,67 +172,84 @@ public class GameManager extends Application {
         }
     }
 
-
+    /**
+     * Load game click event.
+     *
+     * @param event the event
+     */
     @FXML
-    public void loadOldGame(ActionEvent event) {
+    public void loadOldGame(final ActionEvent event) {
         try {
-            ExecutorService executor = Executors.newSingleThreadExecutor();
+            try (ExecutorService executor = Executors.newSingleThreadExecutor()) {
 
-            executor.submit(() -> {
-                loadGame();
-            });
-
-            executor.shutdown(); // 记得在不需要时关闭 ExecutorService
+                executor.submit(this::loadGame);
+            }
             launchPlayBoard((Stage) ((Node) event.getSource()).getScene().getWindow());
         } catch (IOException e) {
             e.printStackTrace(); // Handle the IOException appropriately
         }
     }
+    /**
+     * set and start render timer and load timer for the game.
+     */
+    private void setTimers() {
 
+        final double runFreq = 0.03;
+        final double saveFreq = 5;
+        final double renderFreq = 0.9;
+        final int zero = 0;
+        timer = new AnimationTimer() {
+            @Override
+            public void handle(final long now) {
+                time += runFreq;
+                if (time >= renderFreq) {
+                    if (selected.getPieces() != null) {
+                        update();
+                        render();
+                    }
+                    time = zero;
+                }
+            }
+        };
+        AnimationTimer loadTimer = new AnimationTimer() {
+            @Override
+            public void handle(final long now) {
+                loadTime += runFreq;
+                if (loadTime >= saveFreq) {
+                    saveGame();
+                    loadTime = zero;
+                }
+            }
+
+        };
+        loadTimer.start();
+        timer.start();
+    }
+    /**
+     * Return the game board node.
+     *
+     * @return the basic game node
+     */
+    @SuppressWarnings("checkstyle:HiddenField")
     public Parent setContent() {
         Pane root = new Pane();
         root.setPrefSize(GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE);
-
         Canvas canvas = new Canvas(GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE);
         gc = canvas.getGraphicsContext2D();
         root.getChildren().add(canvas);
-
         generateBasicMinos(); // generate the basic minos collection
         minoInQueue = original.get(new Random().nextInt(original.size())).copy();  // generate the first mino for spawn
         minoInQueue.move(GRID_WIDTH / 2, 0);
         minoPreview = original.get(new Random().nextInt(original.size())).copy(); // generate the next mino for preview
-
-        timer = new AnimationTimer() {
-
-            @Override
-            public void handle(long now) {
-                time += 0.03;
-                if(time >= 0.9) {
-                    if(selected.getPieces() != null){
-                        update();
-                        render();
-                    }
-                    time = 0;
-                }
-            }
-        };
-
-        loadtimer = new AnimationTimer(){
-            @Override
-            public void handle(long now) {
-                loadtime += 0.03;
-                if(loadtime >= 5) {
-                    saveGame();
-                    loadtime = 0;
-                }
-            }
-
-        };
-        loadtimer.start();
-        timer.start();
+        setTimers();
         return root;
     }
-
+    /**
+     * Check if the tag ID is the given ID.
+     *
+     * @param id the id
+     * @return true if the tag ID is the given ID
+     */
     private boolean isTagID(final int id) {
         for (Piece.RecycleType t : Piece.RecycleType.values()) {
             if (t.tagID() == id) {
@@ -197,42 +259,57 @@ public class GameManager extends Application {
         return false;
     }
 
+    /**
+     * Check if the state is valid.
+     *
+     * @return true if the state is valid
+     */
     public boolean isValidateState() {
         for (int y = 0; y < GRID_HEIGHT; y++) {
             for (int x = 0; x < GRID_WIDTH; x++) {
                 if (grid[x][y] > 1 && !isTagID(grid[x][y])) {
-                    return false;
+                    return true;
                 }
             }
         }
-        return true;
+        return false;
     }
 
+    /**
+     * update the game board.
+     */
     private void update() {
         makeMove(p -> p.move(Direction.DOWN), p -> p.move(Direction.UP), true);
     }
 
-    public void makeMove(Consumer<Mino> onSuccess, Consumer<Mino> onFail, boolean endMove) {
-        selected.getPieces().forEach(p -> removePiece(p));
+    /**
+     * Check if the move is valid.
+     *
+     * @param onSuccess the on success Direction
+     * @param onFail the on fail Direction
+     * @param endMove if end move
+     */
+    public void makeMove(final Consumer<Mino> onSuccess, final Consumer<Mino> onFail, final boolean endMove) {
+        selected.getPieces().forEach(this::removePiece);
         onSuccess.accept(selected);  // move down 1 unit
         boolean offBoard = selected.getPieces().stream().anyMatch(this::isOffBoard);
         if (!offBoard) {
-            selected.getPieces().forEach(p -> placePiece(p));
+            selected.getPieces().forEach(this::placePiece);
         } else {
             onFail.accept(selected);  // move back to the last position
-            selected.getPieces().forEach(p -> placePiece(p));
+            selected.getPieces().forEach(this::placePiece);
             if (endMove) {
-                selected.getPieces().forEach(p -> placeTagID(p));
+                selected.getPieces().forEach(this::placeTagID);
                 checkAndRemove();
             }
             return;
         }
-        if (!isValidateState()) {
-            selected.getPieces().forEach(p -> removePiece(p));
+        if (isValidateState()) {
+            selected.getPieces().forEach(this::removePiece);
             onFail.accept(selected);
-            selected.getPieces().forEach(p -> placePiece(p));
+            selected.getPieces().forEach(this::placePiece);
             if (endMove) {
-                selected.getPieces().forEach(p -> placeTagID(p));
+                selected.getPieces().forEach(this::placeTagID);
                 checkAndRemove();
             }
         }
@@ -272,20 +349,6 @@ public class GameManager extends Application {
         for (int x = 0; x < GRID_WIDTH; x++) {
             for (int y = GRID_HEIGHT - 1; y >= 0; y--) {
                 if (toRemove[x][y]) {
-                    // deletion sound
-//                    ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-//
-//                    // define the second thread
-//                    executor.schedule(() -> {
-//
-//                       deletionMediaPlayer.stop();
-//                       deletionMediaPlayer.play();
-//
-//                    }, 600, TimeUnit.MILLISECONDS);
-//
-//                    // close executor
-//                    executor.shutdown();
-
                     return true;
                 }
             }
@@ -338,17 +401,21 @@ public class GameManager extends Application {
             toRemove = checkMatches();
             hasMatch = hasMatch(toRemove);
             if (hasMatch) {
-                counter ++;
+                counter++;
                 System.out.println("Combo!");
             }
         }
-        if(counter > 0){
+        if (counter > 0) {
+            int base = 600;
+            System.out.println("counter count: " + counter);
             ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-            for(int z=0;z<counter;z++){
+            for (int z = 0; z < counter; z++) {
+                int finalZ = z + 1;
+                long delay = (long) base * finalZ;
                 executor.schedule(() -> {
                     deletionMediaPlayer.stop();
                     deletionMediaPlayer.play();
-                }, 600*(z+1), TimeUnit.MILLISECONDS);
+                }, delay, TimeUnit.MILLISECONDS);
             }
             executor.shutdown();
         }
@@ -371,6 +438,7 @@ public class GameManager extends Application {
         }
     }
 
+    @SuppressWarnings("checkstyle:AvoidInlineConditionals")
     private boolean[][] checkMatches() {  // return a boolean matrix to represent the matches to remove
         boolean[][] toRemove = new boolean[GRID_WIDTH][GRID_HEIGHT];
         int tagID;
@@ -413,29 +481,41 @@ public class GameManager extends Application {
 
         return toRemove;
     }
+    /**
+     * render the canvas game board.
+     */
     public void render() {
         gc.clearRect(0, 0, GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE);
         minos.forEach(mino -> mino.draw(gc));
     }
 
-    private void levelupIfNeed(){
+    /**
+     * Level up if user reach the designed score.
+     */
+    @Override
+    public void levelUpIfNeed() {
         final int base = 100;
-        if(scoreNum >= base * level){
+        if (scoreNum >= base * level) {
             level++;
             GameUIHelper.updateLv(level);
             scoreNum = 0;
         }
     }
 
+    /**
+     * calculate the score.
+     */
+    @Override
     public void calculateScore() {
+        final int scoreBase = 10;
         if (comboCount > 0) {
-            scoreNum += 10 * comboCount;
+            scoreNum += scoreBase * comboCount;
         } else {
-            scoreNum += 10;
+            scoreNum += scoreBase;
         }
-        levelupIfNeed();
+        levelUpIfNeed();
         GameUIHelper.updateCurrentScore(scoreNum);
-        if(scoreNum > scoreAchieved){
+        if (scoreNum > scoreAchieved) {
             scoreAchieved = scoreNum;
             GameUIHelper.updateHistoryScore(scoreAchieved);
         }
@@ -448,16 +528,16 @@ public class GameManager extends Application {
             if (targetNode == null) {
                 throw new NullPointerException("cannot find child node fx:id for argument: preview");
             } else {
-                minoPreview.getPieces().forEach(p -> {
-                    elements.add(GameUIHelper.generatePreviewElement(p.getTag().getImageString(), TILE_SIZE));
-                });
-                ((VBox)targetNode).getChildren().clear();
-                ((VBox)targetNode).getChildren().addAll(elements);
+                minoPreview.getPieces().forEach(p -> elements.add(GameUIHelper.generatePreviewElement(p.getTag().getImageString(), TILE_SIZE)));
+                ((VBox) targetNode).getChildren().clear();
+                ((VBox) targetNode).getChildren().addAll(elements);
             }
         });
     }
 
-
+    /**
+     * Spawn the new mino on the board.
+     */
     public void spawn() {
         selected = minoInQueue;
         minos.add(minoInQueue);
@@ -467,93 +547,109 @@ public class GameManager extends Application {
         for (Piece piece : minoInQueue.getPieces()) {
             placePiece(piece);
         }
-        if (!isValidateState()) {
-            launchPopUp("Game Over", "Your score is " + scoreNum + ". Do you want to restart or leave?", true);
+        if (isValidateState()) {
+            launchPopUp("Your score is " + scoreNum + ". Do you want to restart or leave?");
         }
     }
+    /**
+     * Place tag ID to grid.
+     *
+     * @param piece the piece
+     */
     public void placeTagID(final Piece piece) {
         grid[piece.getX()][piece.getY()] = piece.getTag().getID();
-//        System.out.println(grid[piece.getX()][piece.getY()]);
     }
 
+    /**
+     * Place piece to grid.
+     *
+     * @param piece the piece
+     */
     public void placePiece(final Piece piece) {
         grid[piece.getX()][piece.getY()]++;
     }
 
+    /**
+     * Remove piece from grid.
+     *
+     * @param piece the piece
+     */
     public void removePiece(final Piece piece) {
         grid[piece.getX()][piece.getY()]--;
     }
+    /**
+     * Clear piece from grid.
+     *
+     * @param piece the piece
+     */
     public void clearPiece(final Piece piece) {
         grid[piece.getX()][piece.getY()] = 0;
     }
 
+    /**
+     * Check if the piece is off the board.
+     *
+     * @param piece the piece
+     * @return true if the piece is off the board
+     */
     public boolean isOffBoard(final Piece piece) {
         return piece.getX() < 0 || piece.getX() >= GRID_WIDTH || piece.getY() < 0 || piece.getY() >= GRID_HEIGHT;
     }
 
+    /**
+     * Pause the game.
+     */
     public void stopTimer() {
         if (timer != null) {
             timer.stop();
         }
     }
-
-    private void launchPopUp(String title, String content, boolean isGameOver) {
+    /**
+     * Launch pop up window.
+     *
+     * @param content the message to display
+     */
+    private void launchPopUp(final String content) {
         stopTimer();
         Dialog<ButtonType> dialog = new Dialog<>();
-        dialog.setTitle(title);
+        dialog.setTitle("Game Over");
         dialog.setContentText(content);
 
-        if(!isGameOver){
-            ButtonType okButtonType = new ButtonType("RESUME", ButtonBar.ButtonData.OK_DONE);
-            ButtonType cancelButtonType = new ButtonType("RESTART", ButtonBar.ButtonData.FINISH);
-            ButtonType leaveButtonType = new ButtonType("LEAVE", ButtonBar.ButtonData.FINISH);
-            dialog.getDialogPane().getButtonTypes().addAll(okButtonType, cancelButtonType,leaveButtonType);
-        }else{
-            ButtonType cancelButtonType = new ButtonType("RESTART", ButtonBar.ButtonData.FINISH);
-            ButtonType leaveButtonType = new ButtonType("LEAVE", ButtonBar.ButtonData.FINISH);
-            dialog.getDialogPane().getButtonTypes().addAll(cancelButtonType,leaveButtonType);
-        }
+        ButtonType cancelButtonType = new ButtonType("RESTART", ButtonBar.ButtonData.FINISH);
+        ButtonType leaveButtonType = new ButtonType("LEAVE", ButtonBar.ButtonData.FINISH);
+        dialog.getDialogPane().getButtonTypes().addAll(cancelButtonType, leaveButtonType);
 
-        dialog.getDialogPane().getChildren().stream().forEach(node -> {
-            node.setStyle("-fx-text-alignment: center;-fx-font-size: 20px;" + GameUIHelper.backgroundColor);
-        });
+        dialog.getDialogPane().getChildren().forEach(node -> node.setStyle("-fx-text-alignment: center;-fx-font-size: 20px;" + GameUIHelper.backgroundColor));
 
         // Add a CSS stylesheet to the dialog pane
         dialog.getDialogPane().getStylesheets().add(
-                getClass().getResource("overWrite.css").toExternalForm()
+                Objects.requireNonNull(getClass().getResource("overWrite.css")).toExternalForm()
         );
 
-        if(!isGameOver){
-            // show dialog and wait for response
-            dialog.showAndWait().ifPresent(response -> {
-                if (response.getText() == "RESUME") {
-                    System.out.println("User clicked OK");
-                } else if (response.getText() == "LEAVE") {
-                    System.exit(0);
-                } else if (response.getText() == "RESTART") {
-                    resetGame();
+        dialog.showAndWait().ifPresent(response -> {
+            if (Objects.equals(response.getText(), "LEAVE")) {
+                //if game over, clear load.txt.
+                File file = new File("src/load.txt");
+                try {
+                    file.delete();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-            });
-        }else{
-            dialog.showAndWait().ifPresent(response -> {
-                if (response.getText() == "LEAVE") {
-                    //if game over, clear load.txt.
-                    File file = new File("src/load.txt");
-                    try {
-                        file.delete();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    System.exit(0);
-                } else if (response.getText() == "RESTART") {
-                    resetGame();
-                }
-            });
-        }
+                System.exit(0);
+            } else if (Objects.equals(response.getText(), "RESTART")) {
+                resetGame();
+            }
+        });
         timer.start();
     }
 
-    public void launchPlayBoard(Stage stage) throws IOException {
+    /**
+     * Launch the play board.
+     *
+     * @param stage the stage to launch play board
+     * @throws IOException the io exception
+     */
+    public void launchPlayBoard(final Stage stage) throws IOException {
 
         // Create the root node (for example, an AnchorPane)
         root = new AnchorPane();
@@ -588,12 +684,12 @@ public class GameManager extends Application {
         previewBox.setId("preview");
 
         //create LvBox
-        Node LvBox = GameUIHelper.createLvBox(level);
+        Node lvBox = GameUIHelper.createLvBox(level);
 
         VBox rightWrapper = new VBox();
-        rightWrapper.getChildren().addAll(previewBox, LvBox);
-        rightWrapper.setMargin(previewBox, new Insets(0, 0, 40, 50));
-        rightWrapper.setMargin(LvBox, new Insets(10, 0, 10, 50));
+        rightWrapper.getChildren().addAll(previewBox, lvBox);
+        VBox.setMargin(previewBox, new Insets(0, 0, 40, 50));
+        VBox.setMargin(lvBox, new Insets(10, 0, 10, 50));
 
         //create playGround
         Parent playGround = setContent();
@@ -601,8 +697,8 @@ public class GameManager extends Application {
 
         //link to game board
         gameBoard.getChildren().addAll(scoreBox, playGround, rightWrapper);
-        gameBoard.setMargin(scoreBox, new Insets(0, 0, 0, 60));
-        gameBoard.setMargin(playGround, new Insets(0, 0, 0, 60));
+        FlowPane.setMargin(scoreBox, new Insets(0, 0, 0, 60));
+        FlowPane.setMargin(playGround, new Insets(0, 0, 0, 60));
 
         gameContainer.getChildren().add(gameBoard);
         root.getChildren().addAll(imageView, gameContainer);
@@ -634,24 +730,22 @@ public class GameManager extends Application {
 
 
                 // ADD BUTTONS
-                dialog.getDialogPane().getButtonTypes().addAll(okButtonType, cancelButtonType,leaveButtonType);
-                dialog.getDialogPane().getChildren().stream().forEach(node -> {
-                    node.setStyle("-fx-text-alignment: center;-fx-font-size: 20px;" + GameUIHelper.backgroundColor);
-                });
+                dialog.getDialogPane().getButtonTypes().addAll(okButtonType, cancelButtonType, leaveButtonType);
+                dialog.getDialogPane().getChildren().forEach(node -> node.setStyle("-fx-text-alignment: center;-fx-font-size: 20px;" + GameUIHelper.backgroundColor));
 
                 // Add a CSS stylesheet to the dialog pane
                 dialog.getDialogPane().getStylesheets().add(
-                        getClass().getResource("overWrite.css").toExternalForm()
+                        Objects.requireNonNull(getClass().getResource("overWrite.css")).toExternalForm()
                 );
 
 
                 // show dialog and wait for response
                 dialog.showAndWait().ifPresent(response -> {
-                    if (response.getText() == "RESUME") {
+                    if (Objects.equals(response.getText(), "RESUME")) {
                         System.out.println("User clicked OK");
-                    } else if (response.getText() == "LEAVE") {
+                    } else if (Objects.equals(response.getText(), "LEAVE")) {
                         stage.close();
-                    } else if (response.getText() == "RESTART") {
+                    } else if (Objects.equals(response.getText(), "RESTART")) {
                         resetGame();
                     }
                     timer.start();
@@ -672,7 +766,11 @@ public class GameManager extends Application {
         deletionMediaPlayer = new MediaPlayer(deletionMedia);
     }
 
-    public void resetGame(){
+    /**
+     * Reset the game.
+     */
+    @Override
+    public void resetGame() {
         for (int y = 0; y < GRID_HEIGHT; y++) {
             for (int x = 0; x < GRID_WIDTH; x++) {
                 grid[x][y] = 0;
@@ -689,8 +787,11 @@ public class GameManager extends Application {
         spawn();
     }
 
-
-public void saveGame() {
+    /**
+     * Save the game.
+     */
+    @Override
+    public void saveGame() {
         File file = new File("src/load.txt");
 
         if (!file.exists()) {
@@ -704,15 +805,15 @@ public void saveGame() {
             }
         }
         JsonFormatter jsonFormatter = new JsonFormatter();
-        jsonFormatter.minoPreview = this.minoPreview;
-        jsonFormatter.minoInQueue = this.minoInQueue;
-        jsonFormatter.scoreNum = this.scoreNum;
-        jsonFormatter.scoreAchieved = this.scoreAchieved;
-        jsonFormatter.comboCount = this.comboCount;
-        jsonFormatter.level = this.level;
-        jsonFormatter.grid = this.grid;
-        jsonFormatter.selected = this.selected;
-        jsonFormatter.minos = this.minos;
+        jsonFormatter.setMinoPreview(this.minoPreview);
+        jsonFormatter.setMinoInQueue(this.minoInQueue);
+        jsonFormatter.setScoreNum(this.scoreNum);
+        jsonFormatter.setScoreAchieved(this.scoreAchieved);
+        jsonFormatter.setComboCount(this.comboCount);
+        jsonFormatter.setLevel(this.level);
+        jsonFormatter.setGrid(this.grid);
+        jsonFormatter.setSelected(this.selected);
+        jsonFormatter.setMinos(this.minos);
 
         try (FileOutputStream fileOut = new FileOutputStream("src/load.txt");
              ObjectOutputStream out = new ObjectOutputStream(fileOut)) {
@@ -721,8 +822,10 @@ public void saveGame() {
                 e.printStackTrace();
         }
     }
-
-    public void loadHistoryRecord(){
+    /**
+     * Load the history record based on data at load.txt.
+     */
+    private void loadHistoryRecord() {
 
         File file = new File("src/load.txt");
         if (file.length() == 0) {
@@ -731,7 +834,7 @@ public void saveGame() {
             try (FileInputStream fileIn = new FileInputStream("src/load.txt");
                  ObjectInputStream in = new ObjectInputStream(fileIn)) {
                 JsonFormatter gameMapper = (JsonFormatter) in.readObject();
-                scoreAchieved = gameMapper.scoreAchieved;
+                scoreAchieved = gameMapper.getScoreAchieved();
                 renderPreviews();
                 GameUIHelper.updateHistoryScore(scoreAchieved);
             } catch (IOException | ClassNotFoundException e) {
@@ -740,21 +843,23 @@ public void saveGame() {
         }
 
     }
-
+    /**
+     * Load the game based on data at load.txt.
+     */
     public void loadGame() {
 
         try (FileInputStream fileIn = new FileInputStream("src/load.txt");
              ObjectInputStream in = new ObjectInputStream(fileIn)) {
             JsonFormatter gameMapper = (JsonFormatter) in.readObject();
-            minoPreview = gameMapper.minoPreview;
-            minoInQueue = gameMapper.minoInQueue;
-            scoreNum = gameMapper.scoreNum;
-            scoreAchieved = gameMapper.scoreAchieved;
-            comboCount = gameMapper.comboCount;
-            level = gameMapper.level;
-            minos = gameMapper.minos;
-            selected = gameMapper.selected;
-            grid = gameMapper.grid;
+            minoPreview = gameMapper.getMinoPreview();
+            minoInQueue = gameMapper.getMinoInQueue();
+            scoreNum = gameMapper.getScoreNum();
+            scoreAchieved = gameMapper.getScoreAchieved();
+            comboCount = gameMapper.getComboCount();
+            level = gameMapper.getLevel();
+            minos = gameMapper.getMinos();
+            selected = gameMapper.getSelected();
+            grid = gameMapper.getGrid();
             renderPreviews();
             GameUIHelper.updateCurrentScore(scoreNum);
             GameUIHelper.updateHistoryScore(scoreAchieved);
@@ -762,20 +867,21 @@ public void saveGame() {
             e.printStackTrace();
         }
     }
-
-
+    /**
+     * Override the start method in Application.
+     */
     @Override
-    public void start(Stage stage) throws IOException {
+    public void start(final Stage stage) throws IOException {
 
-        Parent welcomeRoot = FXMLLoader.load(getClass().getResource("hello-view.fxml"));
+        Parent welcomeRoot = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("hello-view.fxml")));
         Scene welcomeScene = new Scene(welcomeRoot, 400, 275);
         welcomeScene.getStylesheets().add(
-                getClass().getResource("overWrite.css").toExternalForm()
+                Objects.requireNonNull(getClass().getResource("overWrite.css")).toExternalForm()
         );
         stage.setScene(welcomeScene);
         stage.setTitle("EcoStack");
         stage.show();
-        Platform.runLater(()->{
+        Platform.runLater(() -> {
             Button loadBtn = (Button) welcomeRoot.lookup("#loadGameButton");
             File file = new File("src/load.txt");
             if (file.length() == 0) {
@@ -784,8 +890,12 @@ public void saveGame() {
         });
     }
 
-
-    public static void main(String[] args) {
+    /**
+     * Drive the program.
+     *
+     * @param args the input arguments
+     */
+    public static void main(final String[] args) {
         String musicFile = "src/asset/sound/bgm.wav"; // 相对路径，假设音频文件与 Java 源代码在同一目录下
         try {
             File audioFile = new File(musicFile);

@@ -1,54 +1,65 @@
 package com.example.game;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.fxml.FXML;
-
-import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
-import javafx.scene.text.Text;
 import java.util.ArrayList;
 import java.util.List;
-import javafx.beans.binding.Bindings;
 import javafx.scene.control.Label;
 import javafx.beans.property.StringProperty;
 
-
+/**
+ * A Game UI Helper class that controls the GUI.
+ *
+ * @author Muyang Li
+ * @version 2023
+ */
 public final class GameUIHelper {
 
-    public static Label currentScoreLabel = new Label();
+    private GameUIHelper() { }
+    private static Label currentScoreLabel = new Label();
 
-    public static Label historyScoreLabel = new Label();
+    private static Label historyScoreLabel = new Label();
 
-    public static StringProperty scoreProperty;
+    private static StringProperty scoreProperty;
 
-    public static StringProperty hisScoreProperty;
+    private static StringProperty hisScoreProperty;
 
-    public static StringProperty levelProperty;
+    private static StringProperty levelProperty;
 
+    /**
+     * The background color of the game.
+     */
     public static final String backgroundColor = "-fx-background-color: #fee3c5;";
 
+    /**
+     * The style of the box.
+     */
+    public static final String boxStyle = "-fx-background-color: #fee3c5;"
+            + "-fx-border-color: #000000;-fx-border-width: 2px;"
+            + "-fx-border-radius: 5px;";
 
-    public static final String boxStyle = "-fx-background-color: #fee3c5;" +
-            "-fx-border-color: #000000;-fx-border-width: 2px;" +
-            "-fx-border-radius: 5px;";
+    private static final String activeButtonStyle = "-fx-background-color: #2ed573; -fx-text-fill: #ffffff;"
+            + "-fx-border-color: black; -fx-border-radius: 5px; -fx-background-radius:8px; -fx-font-size: 20px;"
+            + "-fx-border-width:3px; -fx-shadow-color: #000000; -fx-shadow-radius: 5px; -fx-shadow-inset: 0px;"
+            + "-fx-cursor: hand;";
 
-    public static final String activeButtonStyle = "-fx-background-color: #2ed573; -fx-text-fill: #ffffff;" +
-            "-fx-border-color: black; -fx-border-radius: 5px; -fx-background-radius:8px; -fx-font-size: 20px;" +
-            "-fx-border-width:3px; -fx-shadow-color: #000000; -fx-shadow-radius: 5px; -fx-shadow-inset: 0px;" +
-            "-fx-cursor: hand;";
+    private static final String inactiveButtonStyle = "-fx-background-color: #dfe6e9; -fx-text-fill: #929292;"
+            + "-fx-border-color: #929292; -fx-border-radius: 5px; -fx-background-radius:8px;"
+            + "-fx-font-size: 20px; -fx-border-width:3px;";
 
-    public static final String inactiveButtonStyle = "-fx-background-color: #dfe6e9; -fx-text-fill: #929292;" +
-            "-fx-border-color: #929292; -fx-border-radius: 5px; -fx-background-radius:8px;" +
-            "-fx-font-size: 20px; -fx-border-width:3px;";
-
-
-    public static Node generatePreviewElement(String path, int size) {
+    /**
+     * Generate the preview box for the game.
+     *
+     * @param path The path of the image
+     * @param size The size of the image
+     * @return The node of the preview box
+     */
+    public static Node generatePreviewElement(final String path, final int size) {
         Image image = new Image(path);
         ImageView imageView = new ImageView(image);
         StackPane stackPane = new StackPane();
@@ -61,8 +72,14 @@ public final class GameUIHelper {
         StackPane.setAlignment(imageView, Pos.CENTER);
         return stackPane;
     }
-
-    public static Node createScoreBoard(Integer scoreNum, Integer scoreAchieved) {
+    /**
+     * Generate the score box for the game.
+     *
+     * @param scoreNum The current score
+     * @param scoreAchieved The highest score
+     * @return The node of the score box
+     */
+    public static Node createScoreBoard(final Integer scoreNum, final Integer scoreAchieved) {
         int tileSize = GameManager.TILE_SIZE;
         int gridWidth = GameManager.GRID_WIDTH;
         VBox scoreBox = new VBox();
@@ -77,17 +94,29 @@ public final class GameUIHelper {
         scoreBox.getChildren().addAll(currentScoreLabel, historyScoreLabel);
         return scoreBox;
     }
-
-    public static void updateCurrentScore(Integer scoreNum) {
+    /**
+     * Update the current score.
+     *
+     * @param scoreNum The current score
+     */
+    public static void updateCurrentScore(final Integer scoreNum) {
         scoreProperty.set("SCORE: " + scoreNum + "\n");
     }
-
-    public static void updateHistoryScore(Integer scoreAchieved) {
+    /**
+     * Update the highest score.
+     *
+     * @param scoreAchieved The highest score
+     */
+    public static void updateHistoryScore(final Integer scoreAchieved) {
 
         hisScoreProperty.set("ACHIEVED :" + scoreAchieved);
 
     }
-
+    /**
+     * Generate the dynamic preview boxes for the game.
+     *
+     * @return The node of the preview box
+     */
     public static Node createPreviewBox() {
         int tileSize = GameManager.TILE_SIZE;
         VBox previewBox = new VBox();
@@ -105,7 +134,12 @@ public final class GameUIHelper {
         return previewBox;
     }
 
-    public static Node createLvBox(Integer level) {
+    /**
+     * Generate the lv box for the game.
+     *
+     * @return The node of the lv box
+     */
+    public static Node createLvBox(final Integer level) {
         int tileSize = GameManager.TILE_SIZE;
         FlowPane LvBox = new FlowPane();
         levelProperty = new SimpleStringProperty("LV" + level.toString());
@@ -120,17 +154,12 @@ public final class GameUIHelper {
         return LvBox;
     }
 
-    public static void updateLv(Integer lv){
+    /**
+     * Update the lv box for the game.
+     *
+     * @param lv The current level
+     */
+    public static void updateLv(final Integer lv) {
         levelProperty.set("LV" + lv);
     }
-
-    public static Button createGeneralButton(String context){
-        Button btn = new Button();
-        btn.setText(context);
-        btn.setStyle(activeButtonStyle);
-        btn.setMinHeight(50);
-        btn.setMinWidth(140);
-        return btn;
-    }
-
 }
