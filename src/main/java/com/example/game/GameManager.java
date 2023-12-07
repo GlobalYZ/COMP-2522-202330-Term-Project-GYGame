@@ -222,7 +222,6 @@ public class GameManager extends Application implements PuzzleGame {
      *
      * @return the basic game node
      */
-    @SuppressWarnings("checkstyle:HiddenField")
     public Parent setContent() {
         Pane contentRoot = new Pane();
         contentRoot.setPrefSize(GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE);
@@ -603,7 +602,6 @@ public class GameManager extends Application implements PuzzleGame {
      *
      * @param content the message to display
      */
-    @SuppressWarnings("checkstyle:IllegalThrows")
     private void launchPopUp(final String content)  {
         stopTimer();
         Dialog<ButtonType> dialog = new Dialog<>();
@@ -630,6 +628,7 @@ public class GameManager extends Application implements PuzzleGame {
                 System.exit(0);
             } else if (Objects.equals(response.getText(), "RESTART")) {
                 resetGame();
+                timer.start();
             }
         }));
     }
