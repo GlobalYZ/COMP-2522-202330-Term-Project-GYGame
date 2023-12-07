@@ -50,8 +50,6 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 
@@ -88,6 +86,7 @@ public class GameManager extends Application implements PuzzleGame {
     private MediaPlayer interactMediaPlayer;
 
     private MediaPlayer deletionMediaPlayer;
+    private MediaPlayer deletionMediaPlayer2;
 
     private int[][] grid = new int[GRID_WIDTH][GRID_HEIGHT];
 
@@ -105,7 +104,6 @@ public class GameManager extends Application implements PuzzleGame {
     private final int negativeTwo = -2;
     private final double saveFreq = 5;
     private final double levelUpTime = 0.1;
-
     /**
      * Generate the list of basic minos.
      */
@@ -349,6 +347,13 @@ public class GameManager extends Application implements PuzzleGame {
         }
         return false;
     }
+    private void clearAndPlaySound(final int x, final int y) {
+        grid[x][y] = 0;
+        deletionMediaPlayer.stop();
+        deletionMediaPlayer2.stop();
+        deletionMediaPlayer2.play();
+        calculateScore();
+    }
     private void checkRemove(final boolean[][] toRemove) {
         for (int x = zero; x < GRID_WIDTH; x++) {
             int match = 0;
@@ -357,8 +362,7 @@ public class GameManager extends Application implements PuzzleGame {
                     for (Mino mino : minos) {
                         mino.detach(x, y);
                     }
-                    grid[x][y] = 0;
-                    calculateScore();
+                    clearAndPlaySound(x, y);
                     match++;
                 } else if (match > 0) {
                     int shift = match;
@@ -383,17 +387,9 @@ public class GameManager extends Application implements PuzzleGame {
     }
     private void playSoundEffects(final int counter) {
         if (counter > 0) {
-            final int base = 600;
-            ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-            for (int z = 0; z < counter; z++) {
-                int finalZ = z + 1;
-                long delay = (long) base * finalZ;
-                executor.schedule(() -> {
-                    deletionMediaPlayer.stop();
-                    deletionMediaPlayer.play();
-                }, delay, TimeUnit.MILLISECONDS);
-            }
-            executor.shutdown();
+            deletionMediaPlayer2.stop();
+            deletionMediaPlayer.stop();
+            deletionMediaPlayer.play();
         }
     }
 
@@ -626,7 +622,7 @@ public class GameManager extends Application implements PuzzleGame {
                 Objects.requireNonNull(getClass().getResource("overWrite.css")).toExternalForm()
         );
 
-        dialog.showAndWait().ifPresent(response -> {
+        Platform.runLater(() -> dialog.showAndWait().ifPresent(response -> {
             if (Objects.equals(response.getText(), "LEAVE")) {
                 //if game over, clear load.txt.
                 File file = new File("src/load.txt");
@@ -635,8 +631,7 @@ public class GameManager extends Application implements PuzzleGame {
             } else if (Objects.equals(response.getText(), "RESTART")) {
                 resetGame();
             }
-        });
-        timer.start();
+        }));
     }
     private void launchPauseWindow(final Stage stage) {
         stopTimer();
@@ -776,6 +771,9 @@ public class GameManager extends Application implements PuzzleGame {
         String deletionFile = "src/asset/sound/deletion.mp3";
         Media deletionMedia = new Media(new File(deletionFile).toURI().toString());
         deletionMediaPlayer = new MediaPlayer(deletionMedia);
+        String deletionFile2 = "src/asset/sound/deletion2.mp3";
+        Media deletionMedia2 = new Media(new File(deletionFile2).toURI().toString());
+        deletionMediaPlayer2 = new MediaPlayer(deletionMedia2);
     }
 
     /**
