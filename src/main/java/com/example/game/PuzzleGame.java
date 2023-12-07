@@ -23,12 +23,6 @@ interface PuzzleGame {
      * Level up if user reach the designed score.
      */
     void levelUpIfNeed();
-
-    /**
-     * calculate the score.
-     */
-    void calculateScore();
-
     /**
      * Reset the game.
      */

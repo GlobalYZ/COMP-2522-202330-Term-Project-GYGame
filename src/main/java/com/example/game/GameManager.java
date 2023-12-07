@@ -21,15 +21,29 @@ import javafx.scene.control.Dialog;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
-import javafx.scene.layout.*;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.media.Media;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.scene.media.MediaPlayer;
 
-import javax.sound.sampled.*;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.UnsupportedAudioFileException;
+import javax.sound.sampled.LineUnavailableException;
 
-import java.io.*;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.FileInputStream;
+import java.io.ObjectInputStream;
+import java.io.File;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -86,6 +100,11 @@ public class GameManager extends Application implements PuzzleGame {
     private Mino minoInQueue; // the mino that is going to be selected on the board
 
     private Mino minoPreview; // the mino that is going to be placed on the board
+
+    private final int zero = 0;
+    private final int negativeTwo = -2;
+    private final double saveFreq = 5;
+    private final double levelUpTime = 0.1;
 
     /**
      * Generate the list of basic minos.
@@ -157,10 +176,11 @@ public class GameManager extends Application implements PuzzleGame {
             e.printStackTrace(); // Handle the IOException appropriately
         }
     }
+
     /**
-     * set and start render timer and load timer for the game.
+     * set and start load timer for the game.
      */
-    private void setTimers() {
+    private void setLoadTimer() {
         timer = new AnimationTimer() {
             @Override
             public void handle(final long now) {
@@ -170,21 +190,28 @@ public class GameManager extends Application implements PuzzleGame {
                         update();
                         render();
                         if (levelUp) {
-                            timeThreshold -= 0.1;
+                            timeThreshold -= levelUpTime;
                             levelUp = false;
                         }
                     }
-                    time = 0;
+                    time = zero;
                 }
             }
         };
+    }
+
+    /**
+     * set and start render timer and load timer for the game.
+     */
+    private void setTimers() {
+        setLoadTimer();
         AnimationTimer loadTimer = new AnimationTimer() {
             @Override
             public void handle(final long now) {
                 loadTime += TIME_ELAPSED;
-                if (loadTime >= 5) {
+                if (loadTime >= saveFreq) {
                     saveGame();
-                    loadTime = 0;
+                    loadTime = zero;
                 }
             }
 
@@ -199,17 +226,17 @@ public class GameManager extends Application implements PuzzleGame {
      */
     @SuppressWarnings("checkstyle:HiddenField")
     public Parent setContent() {
-        Pane root = new Pane();
-        root.setPrefSize(GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE);
+        Pane contentRoot = new Pane();
+        contentRoot.setPrefSize(GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE);
         Canvas canvas = new Canvas(GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE);
         gc = canvas.getGraphicsContext2D();
-        root.getChildren().add(canvas);
+        contentRoot.getChildren().add(canvas);
         generateBasicMinos(); // generate the basic minos collection
         minoInQueue = original.get(new Random().nextInt(original.size())).copy();  // generate the first mino for spawn
-        minoInQueue.move(GRID_WIDTH / 2, 0);
+        minoInQueue.move(GRID_WIDTH / -(negativeTwo), 0);
         minoPreview = original.get(new Random().nextInt(original.size())).copy(); // generate the next mino for preview
         setTimers();
-        return root;
+        return contentRoot;
     }
     /**
      * Check if the tag ID is the given ID.
@@ -322,59 +349,41 @@ public class GameManager extends Application implements PuzzleGame {
         }
         return false;
     }
-
-    private void checkAndRemove() {
-        boolean[][] toRemove = checkMatches();
-        boolean hasMatch = hasMatch(toRemove);
-        int counter = 0;
-        while (hasMatch) {
-            for (int x = 0; x < GRID_WIDTH; x++) {
-                int match = 0;
-                for (int y = GRID_HEIGHT - 1; y >= 0; y--) {
-                    if (toRemove[x][y]) {
-
-                        System.out.println("Removing: " + grid[x][y] + " at (" + x + ", " + y + ") ");
-                        for (Mino mino : minos) {
-                            mino.detach(x, y);
+    private void checkRemove(final boolean[][] toRemove) {
+        for (int x = zero; x < GRID_WIDTH; x++) {
+            int match = 0;
+            for (int y = GRID_HEIGHT - 1; y >= 0; y--) {
+                if (toRemove[x][y]) {
+                    for (Mino mino : minos) {
+                        mino.detach(x, y);
+                    }
+                    grid[x][y] = 0;
+                    calculateScore();
+                    match++;
+                } else if (match > 0) {
+                    int shift = match;
+                    // another gravity, check if there are empty spots below the removed pieces
+                    while (y + shift < GRID_HEIGHT - 1 && grid[x][y + shift + 1] == 0) {
+                        shift++;
+                    }
+                    dropPiece(x, y, shift);
+                    // Gravity for the pieces on the left and right
+                    for (int i = negativeTwo; i <= 2; i++) {
+                        if (i == 0) {
+                            continue; // Skip i = 0, which is the current column
                         }
-                        grid[x][y] = 0;
-
-                        Platform.runLater(() -> {
-                            deletionMediaPlayer.stop();
-                            deletionMediaPlayer.play();
-                            calculateScore();
-                        });
-                        match++;
-                    } else if (match > 0) {
-                        int shift = match;
-                        // another gravity, check if there are empty spots below the removed pieces
-                        while (y + shift < GRID_HEIGHT - 1 && grid[x][y + shift + 1] == 0) {
-                            shift++;
-                        }
-                        dropPiece(x, y, shift);
-                        // Gravity for the pieces on the left and right
-                        for (int i = -2; i <= 2; i++) {
-                            if (i == 0) {
-                                continue; // Skip i = 0, which is the current column
-                            }
-                            int newX = x + i;
-                            if (i < 0 || (newX < GRID_WIDTH && !toRemove[newX][y + match])) {
-                                gravity(newX, y + match, i < 0);
-                            }
+                        int newX = x + i;
+                        if (i < 0 || (newX < GRID_WIDTH && !toRemove[newX][y + match])) {
+                            gravity(newX, y + match, i < 0);
                         }
                     }
                 }
             }
-            toRemove = checkMatches();
-            hasMatch = hasMatch(toRemove);
-            if (hasMatch) {
-                counter++;
-                System.out.println("Combo!");
-            }
         }
+    }
+    private void playSoundEffects(final int counter) {
         if (counter > 0) {
-            int base = 600;
-            System.out.println("counter count: " + counter);
+            final int base = 600;
             ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
             for (int z = 0; z < counter; z++) {
                 int finalZ = z + 1;
@@ -386,7 +395,21 @@ public class GameManager extends Application implements PuzzleGame {
             }
             executor.shutdown();
         }
+    }
 
+    private void checkAndRemove() {
+        boolean[][] toRemove = checkMatches();
+        boolean hasMatch = hasMatch(toRemove);
+        int counter = 0;
+        while (hasMatch) {
+            checkRemove(toRemove);
+            toRemove = checkMatches();
+            hasMatch = hasMatch(toRemove);
+            if (hasMatch) {
+                counter++;
+            }
+        }
+        playSoundEffects(counter);
         minoInQueue = minoPreview;  // overwrite the going-to-be-selected mino by the previous preview mino
         minoInQueue.move(GRID_WIDTH / 2, 0);
         minoPreview = original.get(new Random().nextInt(original.size())).copy();
@@ -394,8 +417,6 @@ public class GameManager extends Application implements PuzzleGame {
     }
 
     private void boosterMarkRemove(final boolean[][] toRemove, final int tagID) {
-        System.out.println("Booster deleting tagID: " + tagID);
-
         for (int x = 0; x < GRID_WIDTH; x++) {
             for (int y = GRID_HEIGHT - 1; y >= 0; y--) {
                 if (grid[x][y] == tagID) {
@@ -404,12 +425,33 @@ public class GameManager extends Application implements PuzzleGame {
             }
         }
     }
-
+    private void checkForHorizontalMatch(final boolean[][] toRemove) {
+        for (int y = 0; y < GRID_HEIGHT; y++) {
+            for (int x = 0; x < GRID_WIDTH - 2; x++) {
+                if ((grid[x][y] == BOOSTER_ID && grid[x + 1][y] != 0 && grid[x + 1][y] == grid[x + 2][y])
+                        || (grid[x][y] != 0 && grid[x][y] == grid[x + 1][y] && grid[x + 2][y] == BOOSTER_ID)
+                        || (grid[x][y] != 0 && grid[x][y] == grid[x + 2][y] && grid[x + 1][y] == BOOSTER_ID)
+                        || (grid[x][y] != 0 && grid[x][y] == grid[x + 1][y] && grid[x][y] == grid[x + 2][y])) {
+                    toRemove[x][y] = true;
+                    toRemove[x + 1][y] = true;
+                    toRemove[x + 2][y] = true;
+                    if (grid[x][y] == BOOSTER_ID || grid[x + 1][y] == BOOSTER_ID || grid[x + 2][y] == BOOSTER_ID) {
+                        int tagID;
+                        if (grid[x][y] == BOOSTER_ID) {
+                            tagID = grid[x + 1][y];
+                        } else {
+                            tagID = grid[x][y];
+                        }
+                        boosterMarkRemove(toRemove, tagID);
+                    }
+                }
+            }
+        }
+    }
 
     private boolean[][] checkMatches() {  // return a boolean matrix to represent the matches to remove
         boolean[][] toRemove = new boolean[GRID_WIDTH][GRID_HEIGHT];
         int tagID;
-
         // Check for vertical matches
         for (int x = 0; x < GRID_WIDTH; x++) {
             for (int y = GRID_HEIGHT - 1; y - 2 >= 0; y--) {
@@ -421,7 +463,11 @@ public class GameManager extends Application implements PuzzleGame {
                     toRemove[x][y - 1] = true;
                     toRemove[x][y - 2] = true;
                     if (grid[x][y] == BOOSTER_ID || grid[x][y - 1] == BOOSTER_ID || grid[x][y - 2] == BOOSTER_ID) {
-                        tagID = grid[x][y] == BOOSTER_ID ? grid[x][y - 1] : grid[x][y];
+                        if (grid[x][y] != BOOSTER_ID) {
+                            tagID = grid[x][y];
+                        } else {
+                            tagID = grid[x][y - 1];
+                        }
                         boosterMarkRemove(toRemove, tagID);
                     }
                 }
@@ -429,23 +475,7 @@ public class GameManager extends Application implements PuzzleGame {
         }
 
         // Check for horizontal matches
-        for (int y = 0; y < GRID_HEIGHT; y++) {
-            for (int x = 0; x < GRID_WIDTH - 2; x++) {
-                if ((grid[x][y] == BOOSTER_ID && grid[x + 1][y] != 0 && grid[x + 1][y] == grid[x + 2][y])
-                || (grid[x][y] != 0 && grid[x][y] == grid[x + 1][y] && grid[x + 2][y] == BOOSTER_ID)
-                || (grid[x][y] != 0 && grid[x][y] == grid[x + 2][y] && grid[x + 1][y] == BOOSTER_ID)
-                || (grid[x][y] != 0 && grid[x][y] == grid[x + 1][y] && grid[x][y] == grid[x + 2][y])) {
-                    toRemove[x][y] = true;
-                    toRemove[x + 1][y] = true;
-                    toRemove[x + 2][y] = true;
-                    if (grid[x][y] == BOOSTER_ID || grid[x + 1][y] == BOOSTER_ID || grid[x + 2][y] == BOOSTER_ID) {
-                        tagID = grid[x][y] == BOOSTER_ID ? grid[x + 1][y] : grid[x][y];
-                        boosterMarkRemove(toRemove, tagID);
-                    }
-                }
-            }
-        }
-
+        checkForHorizontalMatch(toRemove);
         return toRemove;
     }
     /**
@@ -466,14 +496,12 @@ public class GameManager extends Application implements PuzzleGame {
             level++;
             levelUp = true;
             GameUIHelper.updateLv(level);
-            scoreNum = 0;
         }
     }
 
     /**
      * calculate the score.
      */
-    @Override
     public void calculateScore() {
         final int scoreBase = 10;
         if (comboCount > 0) {
@@ -579,7 +607,8 @@ public class GameManager extends Application implements PuzzleGame {
      *
      * @param content the message to display
      */
-    private void launchPopUp(final String content) {
+    @SuppressWarnings("checkstyle:IllegalThrows")
+    private void launchPopUp(final String content)  {
         stopTimer();
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle("Game Over");
@@ -589,7 +618,8 @@ public class GameManager extends Application implements PuzzleGame {
         ButtonType leaveButtonType = new ButtonType("LEAVE", ButtonBar.ButtonData.FINISH);
         dialog.getDialogPane().getButtonTypes().addAll(cancelButtonType, leaveButtonType);
 
-        dialog.getDialogPane().getChildren().forEach(node -> node.setStyle("-fx-text-alignment: center;-fx-font-size: 20px;" + GameUIHelper.backgroundColor));
+        dialog.getDialogPane().getChildren().forEach(node -> node.setStyle(
+                "-fx-text-alignment: center;-fx-font-size: 20px;" + GameUIHelper.BACKGROUND_COLOR));
 
         // Add a CSS stylesheet to the dialog pane
         dialog.getDialogPane().getStylesheets().add(
@@ -600,11 +630,7 @@ public class GameManager extends Application implements PuzzleGame {
             if (Objects.equals(response.getText(), "LEAVE")) {
                 //if game over, clear load.txt.
                 File file = new File("src/load.txt");
-                try {
-                    file.delete();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                file.delete();
                 System.exit(0);
             } else if (Objects.equals(response.getText(), "RESTART")) {
                 resetGame();
@@ -612,38 +638,46 @@ public class GameManager extends Application implements PuzzleGame {
         });
         timer.start();
     }
+    private void launchPauseWindow(final Stage stage) {
+        stopTimer();
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Pause");
+        dialog.setContentText("Do you want to restart the game or save & leave?");
 
-    /**
-     * Launch the play board.
-     *
-     * @param stage the stage to launch play board
-     * @throws IOException the io exception
-     */
-    public void launchPlayBoard(final Stage stage) throws IOException {
+        ButtonType okButtonType = new ButtonType("RESUME", ButtonBar.ButtonData.OK_DONE);
+        ButtonType cancelButtonType = new ButtonType("RESTART", ButtonBar.ButtonData.FINISH);
+        ButtonType leaveButtonType = new ButtonType("LEAVE", ButtonBar.ButtonData.CANCEL_CLOSE);
 
-        // Create the root node (for example, an AnchorPane)
-        root = new AnchorPane();
 
-        HBox gameContainer = new HBox();
+        // ADD BUTTONS
+        dialog.getDialogPane().getButtonTypes().addAll(okButtonType, cancelButtonType, leaveButtonType);
+        dialog.getDialogPane().getChildren().forEach(node -> node.setStyle(
+                "-fx-text-alignment: center;-fx-font-size: 20px;" + GameUIHelper.BACKGROUND_COLOR)
+        );
 
-        // get user screen size
-        Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
-        double screenWidth = screenBounds.getWidth();
-        double screenHeight = screenBounds.getHeight();
-        double gamePadding = (screenHeight - 750) / 2;
+        // Add a CSS stylesheet to the dialog pane
+        dialog.getDialogPane().getStylesheets().add(
+                Objects.requireNonNull(getClass().getResource("overWrite.css")).toExternalForm()
+        );
 
-        // Create an ImageView and set an image
-        Image image = new Image("file:./src/asset/Image/background.jpg");
-        ImageView imageView = new ImageView(image);
-        imageView.fitWidthProperty().bind(root.widthProperty());
-        imageView.fitHeightProperty().bind(root.heightProperty());
 
-        gameContainer.setPrefSize(screenWidth, screenHeight);
-        gameContainer.setAlignment(Pos.CENTER);
-
+        // show dialog and wait for response
+        dialog.showAndWait().ifPresent(response -> {
+            if (Objects.equals(response.getText(), "RESUME")) {
+                System.out.println("User clicked OK");
+            } else if (Objects.equals(response.getText(), "LEAVE")) {
+                stage.close();
+            } else if (Objects.equals(response.getText(), "RESTART")) {
+                resetGame();
+            }
+            timer.start();
+        });
+    }
+    private FlowPane createGameBoard(final double gamePadding) {
         //create game board boxes
         FlowPane gameBoard = new FlowPane();
-        gameBoard.setPrefWidth(600);
+        final int sixHundred = 600;
+        gameBoard.setPrefWidth(sixHundred);
         gameBoard.setPadding(new Insets(gamePadding, 0, gamePadding, 0));
 
         //create score box
@@ -658,23 +692,59 @@ public class GameManager extends Application implements PuzzleGame {
 
         VBox rightWrapper = new VBox();
         rightWrapper.getChildren().addAll(previewBox, lvBox);
-        VBox.setMargin(previewBox, new Insets(0, 0, 40, 50));
-        VBox.setMargin(lvBox, new Insets(10, 0, 10, 50));
+        final int forty = 40;
+        final int fifty = 50;
+        VBox.setMargin(previewBox, new Insets(0, 0, forty, fifty));
+        final int ten = 10;
+        VBox.setMargin(lvBox, new Insets(ten, 0, ten, fifty));
 
         //create playGround
         Parent playGround = setContent();
-        playGround.setStyle(GameUIHelper.boxStyle);
+        playGround.setStyle(GameUIHelper.BOX_STYLE);
 
         //link to game board
         gameBoard.getChildren().addAll(scoreBox, playGround, rightWrapper);
-        FlowPane.setMargin(scoreBox, new Insets(0, 0, 0, 60));
-        FlowPane.setMargin(playGround, new Insets(0, 0, 0, 60));
+        FlowPane.setMargin(scoreBox, new Insets(0, 0, 0, forty + ten));
+        FlowPane.setMargin(playGround, new Insets(0, 0, 0, forty + ten));
+        return gameBoard;
+    }
+    private AnchorPane createRoot() {
+        // Create the root node (for example, an AnchorPane)
+        root = new AnchorPane();
 
+        HBox gameContainer = new HBox();
+        final int halfBoardHeight = 750;
+
+        // get user screen size
+        Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
+        double screenWidth = screenBounds.getWidth();
+        double screenHeight = screenBounds.getHeight();
+        double gamePadding = (screenHeight - halfBoardHeight) / 2;
+
+        // Create an ImageView and set an image
+        Image image = new Image("file:./src/asset/Image/background.jpg");
+        ImageView imageView = new ImageView(image);
+        imageView.fitWidthProperty().bind(root.widthProperty());
+        imageView.fitHeightProperty().bind(root.heightProperty());
+
+        gameContainer.setPrefSize(screenWidth, screenHeight);
+        gameContainer.setAlignment(Pos.CENTER);
+        FlowPane gameBoard = createGameBoard(gamePadding);
         gameContainer.getChildren().add(gameBoard);
         root.getChildren().addAll(imageView, gameContainer);
+        return root;
+    }
 
+    /**
+     * Launch the play board.
+     *
+     * @param stage the stage to launch play board
+     * @throws IOException the io exception
+     */
+    public void launchPlayBoard(final Stage stage) throws IOException {
+        AnchorPane boardRoot = createRoot();
         // Set up the stage and scene
-        Scene scene = new Scene(root);
+        Scene scene = new Scene(boardRoot);
         // keyboard event
         scene.setOnKeyPressed(e -> {
             if (e.getCode() == KeyCode.UP) {
@@ -689,40 +759,7 @@ public class GameManager extends Application implements PuzzleGame {
             } else if (e.getCode() == KeyCode.DOWN) {
                 makeMove(p -> p.move(Direction.DOWN), p -> p.move(Direction.UP), true);
             } else if (e.getCode() == KeyCode.ESCAPE) {
-                stopTimer();
-                Dialog<ButtonType> dialog = new Dialog<>();
-                dialog.setTitle("Pause");
-                dialog.setContentText("Do you want to restart the game or save & leave?");
-
-                ButtonType okButtonType = new ButtonType("RESUME", ButtonBar.ButtonData.OK_DONE);
-                ButtonType cancelButtonType = new ButtonType("RESTART", ButtonBar.ButtonData.FINISH);
-                ButtonType leaveButtonType = new ButtonType("LEAVE", ButtonBar.ButtonData.CANCEL_CLOSE);
-
-
-                // ADD BUTTONS
-                dialog.getDialogPane().getButtonTypes().addAll(okButtonType, cancelButtonType, leaveButtonType);
-                dialog.getDialogPane().getChildren().forEach(node -> node.setStyle(
-                        "-fx-text-alignment: center;-fx-font-size: 20px;" + GameUIHelper.backgroundColor)
-                );
-
-                // Add a CSS stylesheet to the dialog pane
-                dialog.getDialogPane().getStylesheets().add(
-                        Objects.requireNonNull(getClass().getResource("overWrite.css")).toExternalForm()
-                );
-
-
-                // show dialog and wait for response
-                dialog.showAndWait().ifPresent(response -> {
-                    if (Objects.equals(response.getText(), "RESUME")) {
-                        System.out.println("User clicked OK");
-                    } else if (Objects.equals(response.getText(), "LEAVE")) {
-                        stage.close();
-                    } else if (Objects.equals(response.getText(), "RESTART")) {
-                        resetGame();
-                    }
-                    timer.start();
-                });
-
+                launchPauseWindow(stage);
             }
             render();
         });
@@ -730,10 +767,13 @@ public class GameManager extends Application implements PuzzleGame {
         stage.setMaximized(true);
         stage.setTitle("EcoStack");
         stage.show();
-        String interactFile = "src/asset/sound/UI_interact.mp3"; // 替换为你的音乐文件路径
+        setUpMusic();
+    }
+    private void setUpMusic() {
+        String interactFile = "src/asset/sound/UI_interact.mp3";
         Media interactMedia = new Media(new File(interactFile).toURI().toString());
         interactMediaPlayer = new MediaPlayer(interactMedia);
-        String deletionFile = "src/asset/sound/deletion.mp3"; // 替换为你的音乐文件路径
+        String deletionFile = "src/asset/sound/deletion.mp3";
         Media deletionMedia = new Media(new File(deletionFile).toURI().toString());
         deletionMediaPlayer = new MediaPlayer(deletionMedia);
     }
@@ -844,9 +884,10 @@ public class GameManager extends Application implements PuzzleGame {
      */
     @Override
     public void start(final Stage stage) throws IOException {
-
+        final int sWidth = 400;
+        final int sHeight = 275;
         Parent welcomeRoot = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("hello-view.fxml")));
-        Scene welcomeScene = new Scene(welcomeRoot, 400, 275);
+        Scene welcomeScene = new Scene(welcomeRoot, sWidth, sHeight);
         welcomeScene.getStylesheets().add(
                 Objects.requireNonNull(getClass().getResource("overWrite.css")).toExternalForm()
         );

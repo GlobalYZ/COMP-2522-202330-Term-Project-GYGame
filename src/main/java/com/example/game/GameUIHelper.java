@@ -3,12 +3,11 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.*;
-import java.util.ArrayList;
-import java.util.List;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.control.Label;
 import javafx.beans.property.StringProperty;
 
@@ -19,11 +18,20 @@ import javafx.beans.property.StringProperty;
  * @version 2023
  */
 public final class GameUIHelper {
+    /**
+     * The background color of the game.
+     */
+    public static final String BACKGROUND_COLOR = "-fx-background-color: #fee3c5;";
 
-    private GameUIHelper() { }
-    private static Label currentScoreLabel = new Label();
+    /**
+     * The style of the box.
+     */
+    public static final String BOX_STYLE = "-fx-background-color: #fee3c5;"
+            + "-fx-border-color: #000000;-fx-border-width: 2px;"
+            + "-fx-border-radius: 5px;";
 
-    private static Label historyScoreLabel = new Label();
+    private static final Label CURRENT_SCORE_LABEL = new Label();
+    private static final Label HISTORY_SCORE_LABEL = new Label();
 
     private static StringProperty scoreProperty;
 
@@ -31,26 +39,7 @@ public final class GameUIHelper {
 
     private static StringProperty levelProperty;
 
-    /**
-     * The background color of the game.
-     */
-    public static final String backgroundColor = "-fx-background-color: #fee3c5;";
-
-    /**
-     * The style of the box.
-     */
-    public static final String boxStyle = "-fx-background-color: #fee3c5;"
-            + "-fx-border-color: #000000;-fx-border-width: 2px;"
-            + "-fx-border-radius: 5px;";
-
-    private static final String activeButtonStyle = "-fx-background-color: #2ed573; -fx-text-fill: #ffffff;"
-            + "-fx-border-color: black; -fx-border-radius: 5px; -fx-background-radius:8px; -fx-font-size: 20px;"
-            + "-fx-border-width:3px; -fx-shadow-color: #000000; -fx-shadow-radius: 5px; -fx-shadow-inset: 0px;"
-            + "-fx-cursor: hand;";
-
-    private static final String inactiveButtonStyle = "-fx-background-color: #dfe6e9; -fx-text-fill: #929292;"
-            + "-fx-border-color: #929292; -fx-border-radius: 5px; -fx-background-radius:8px;"
-            + "-fx-font-size: 20px; -fx-border-width:3px;";
+    private GameUIHelper() { }
 
     /**
      * Generate the preview box for the game.
@@ -60,10 +49,11 @@ public final class GameUIHelper {
      * @return The node of the preview box
      */
     public static Node generatePreviewElement(final String path, final int size) {
+        final int padding = 10;
         Image image = new Image(path);
         ImageView imageView = new ImageView(image);
         StackPane stackPane = new StackPane();
-        stackPane.setPrefSize(size +10, size +10);
+        stackPane.setPrefSize(size + padding, size + padding);
         imageView.setFitWidth(size);
         imageView.setFitHeight(size);
         stackPane.getChildren().add(imageView);
@@ -80,18 +70,19 @@ public final class GameUIHelper {
      * @return The node of the score box
      */
     public static Node createScoreBoard(final Integer scoreNum, final Integer scoreAchieved) {
+        final int padding = 10;
         int tileSize = GameManager.TILE_SIZE;
         int gridWidth = GameManager.GRID_WIDTH;
         VBox scoreBox = new VBox();
         scoreBox.setPrefWidth(tileSize * gridWidth);
         scoreBox.setAlignment(Pos.CENTER);
-        scoreBox.setPadding(new Insets(10, 0, 20, 0));
+        scoreBox.setPadding(new Insets(padding, 0, padding * 2, 0));
         scoreProperty = new SimpleStringProperty("SCORE: " + scoreNum + "   ");
         hisScoreProperty = new SimpleStringProperty("ACHIEVED :" + scoreAchieved);
-        currentScoreLabel.textProperty().bind(scoreProperty);
-        historyScoreLabel.textProperty().bind(hisScoreProperty);
+        CURRENT_SCORE_LABEL.textProperty().bind(scoreProperty);
+        HISTORY_SCORE_LABEL.textProperty().bind(hisScoreProperty);
         scoreBox.setStyle("-fx-color: #a88d53; -fx-font-size: 28px;-fx-text-alignment: center;");
-        scoreBox.getChildren().addAll(currentScoreLabel, historyScoreLabel);
+        scoreBox.getChildren().addAll(CURRENT_SCORE_LABEL, HISTORY_SCORE_LABEL);
         return scoreBox;
     }
     /**
@@ -118,40 +109,39 @@ public final class GameUIHelper {
      * @return The node of the preview box
      */
     public static Node createPreviewBox() {
+        final int padding = 10;
+        final int previewSize = 3;
         int tileSize = GameManager.TILE_SIZE;
         VBox previewBox = new VBox();
 
-        previewBox.setPrefWidth(tileSize + 10);
-        previewBox.setStyle(boxStyle);
-        List<Node> elements = new ArrayList<>();
-        for (int i=0;i<3;i++) {
-            elements.add(generatePreviewElement("file:./src/asset/Image/Paper.png", tileSize));
-        }
-        previewBox.getChildren().addAll(elements);
+        previewBox.setPrefWidth(tileSize + padding);
+        previewBox.setStyle(BOX_STYLE);
 
         // Set the minimum height to ensure it's respected
-        previewBox.setMaxHeight(3 * (tileSize + 10));
+        previewBox.setMaxHeight(previewSize * (tileSize + padding));
         return previewBox;
     }
 
     /**
      * Generate the lv box for the game.
      *
+     * @param level The current level
      * @return The node of the lv box
      */
     public static Node createLvBox(final Integer level) {
+        final int padding = 10;
         int tileSize = GameManager.TILE_SIZE;
-        FlowPane LvBox = new FlowPane();
+        FlowPane lvBox = new FlowPane();
         levelProperty = new SimpleStringProperty("LV" + level.toString());
-        Label LvLabel = new Label();
-        LvLabel.textProperty().bind(levelProperty);
-        LvLabel.setStyle("-fx-font-size: 20px;-fx-text-alignment: center;-fx-color: #a88d53;");
-        LvBox.setAlignment(Pos.CENTER);
-        LvBox.setMaxWidth(tileSize+10);
-        LvBox.setMinHeight(tileSize+10);
-        LvBox.setStyle(boxStyle);
-        LvBox.getChildren().add(LvLabel);
-        return LvBox;
+        Label lvLabel = new Label();
+        lvLabel.textProperty().bind(levelProperty);
+        lvLabel.setStyle("-fx-font-size: 20px;-fx-text-alignment: center;-fx-color: #a88d53;");
+        lvBox.setAlignment(Pos.CENTER);
+        lvBox.setMaxWidth(tileSize + padding);
+        lvBox.setMinHeight(tileSize + padding);
+        lvBox.setStyle(BOX_STYLE);
+        lvBox.getChildren().add(lvLabel);
+        return lvBox;
     }
 
     /**

@@ -42,14 +42,7 @@ public class Mino implements Serializable {
     public int getX() {
         return x;
     }
-    /**
-     * set X.
-     *
-     * @param x x
-     */
-    public void setX(final int x) {
-        this.x = x;
-    }
+
     /**
      * Get Y.
      *
@@ -58,14 +51,7 @@ public class Mino implements Serializable {
     public int getY() {
         return y;
     }
-    /**
-     * set Y.
-     *
-     * @param y y
-     */
-    public void setY(final int y) {
-        this.y = y;
-    }
+
     /**
      * Get pieces.
      *

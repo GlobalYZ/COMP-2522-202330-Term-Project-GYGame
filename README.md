@@ -8,13 +8,9 @@ aligning it with ecological themes. It serves a social purpose by raising awaren
 ## Table of Contents
 * [General Info](#general-information)
 * [Built With](#built-with)
-* [Features](#features)
 * [Screenshots](#screenshots)
 * [Setup](#setup)
-* [Usage](#usage)
 * [Project Status](#project-status)
-* [Room for Improvement](#room-for-improvement)
-* [Acknowledgements](#acknowledgements)
 * [Contact](#contact)
 
 
@@ -54,7 +50,7 @@ The game gradually speeds up, increasing the difficulty as time goes on.
 ![Mid-game screenshot](./src/asset/Image/Screenshot.png)
 
 
-## Setting Up the Project
+## Setup
 
 This section guides you through getting a copy of the project up and running on your local machine for development and testing purposes.
 

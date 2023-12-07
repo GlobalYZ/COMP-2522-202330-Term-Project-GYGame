@@ -21,8 +21,6 @@ public class Piece implements Serializable {
 
     private Mino parent;
 
-    private boolean isSpecial;
-
     private int x;
 
     private int y;
@@ -58,28 +56,28 @@ public class Piece implements Serializable {
      */
     public static final class Tag implements Serializable {
 
-        @JsonProperty("imageString")
-        private final String imageString;
-
         /**
          * RecycleType to demonstrate the type of the tag.
          */
         @JsonProperty("type")
         public final RecycleType type;
 
-        /**
-         * id of the tag.
-         */
-        @JsonProperty("id")
-        public int id;
+        @JsonProperty("imageString")
+        private final String imageString;
         /**
          * Constructs an object of type Tag.
          */
         public Tag() {
+            final int four = 4;
             List<RecycleType> recycleTypes = new ArrayList<>();
             // chance of getting booster is 1/25
             for (RecycleType t : RecycleType.values()) {
-                int count = t == RecycleType.Booster ? 1 : 4;
+                int count;
+                if (t == RecycleType.Booster) {
+                    count = 1;
+                } else {
+                    count = four;
+                }
                 for (int i = 0; i < count; i++) {
                     recycleTypes.add(t);
                 }
@@ -87,15 +85,6 @@ public class Piece implements Serializable {
             Random random = new Random();
             type = recycleTypes.get(random.nextInt(recycleTypes.size()));
             imageString = "file:./src/asset/Image/" + type.name() + ".png";
-            id = getID();
-        }
-        /**
-         * Get the type of the tag.
-         *
-         * @return RecycleType type
-         */
-        public RecycleType getType() {
-            return type;
         }
         /**
          * Get the image string of the tag.
@@ -203,15 +192,10 @@ public class Piece implements Serializable {
     public Direction getDirection() {
         return direction;
     }
-
-    /**
-     * check if it is a piece of booster.
-     */
-    public boolean isSpecial() {
-        return isSpecial;
-    }
     /**
      * Copy the piece.
+     *
+     * @return Piece copied piece
      */
     public Piece copy() {
         return new Piece(distance, direction);
