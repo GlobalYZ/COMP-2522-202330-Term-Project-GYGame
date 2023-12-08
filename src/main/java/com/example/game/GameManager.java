@@ -789,6 +789,8 @@ public class GameManager extends Application implements PuzzleGame {
         GameUIHelper.updateCurrentScore(scoreNum);
         gc.clearRect(0, 0, GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE);
         minos.clear();
+        level = 1;
+        GameUIHelper.updateLv(level);
         minoPreview = original.get(new Random().nextInt(original.size())).copy();
         minoInQueue = minoPreview;  // overwrite the going-to-be-selected mino by the previous preview mino
         minoInQueue.move(GRID_WIDTH / 2, 0);
