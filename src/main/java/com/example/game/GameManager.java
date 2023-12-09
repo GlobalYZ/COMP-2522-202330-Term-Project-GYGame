@@ -70,9 +70,7 @@ public class GameManager extends Application implements PuzzleGame {
     private AnchorPane root;
 
     private Integer scoreNum = 0;
-    /**
-     * The style of the box.
-     */
+
     private Integer scoreAchieved = 0;
 
     private Integer comboCount = 0;
@@ -105,7 +103,7 @@ public class GameManager extends Application implements PuzzleGame {
     private final double saveFreq = 5;
     private final double levelUpTime = 0.1;
     /**
-     * Generate the list of basic minos.
+     * Generates the list of basic minos.
      */
     public void generateBasicMinos() {
         //0
@@ -142,7 +140,7 @@ public class GameManager extends Application implements PuzzleGame {
     }
 
     /**
-     * Start new game click event.
+     * Starts new game click event.
      *
      * @param event the event
      */
@@ -158,7 +156,7 @@ public class GameManager extends Application implements PuzzleGame {
     }
 
     /**
-     * Load game click event.
+     * Loads game click event.
      *
      * @param event the event
      */
@@ -176,7 +174,7 @@ public class GameManager extends Application implements PuzzleGame {
     }
 
     /**
-     * set and start load timer for the game.
+     * sets and starts load timer for the game.
      */
     private void setLoadTimer() {
         timer = new AnimationTimer() {
@@ -199,7 +197,7 @@ public class GameManager extends Application implements PuzzleGame {
     }
 
     /**
-     * set and start render timer and load timer for the game.
+     * sets and starts render timer and load timer for the game.
      */
     private void setTimers() {
         setLoadTimer();
@@ -218,7 +216,7 @@ public class GameManager extends Application implements PuzzleGame {
         timer.start();
     }
     /**
-     * Return the game board node.
+     * Returns the game board node.
      *
      * @return the basic game node
      */
@@ -236,7 +234,7 @@ public class GameManager extends Application implements PuzzleGame {
         return contentRoot;
     }
     /**
-     * Check if the tag ID is the given ID.
+     * Checks if the tag ID is the given ID.
      *
      * @param id the id
      * @return true if the tag ID is the given ID
@@ -251,7 +249,7 @@ public class GameManager extends Application implements PuzzleGame {
     }
 
     /**
-     * Check if the state is valid.
+     * Checks if the state is valid.
      *
      * @return true if the state is valid
      */
@@ -267,14 +265,14 @@ public class GameManager extends Application implements PuzzleGame {
     }
 
     /**
-     * update the game board.
+     * updates the game board.
      */
     private void update() {
         makeMove(p -> p.move(Direction.DOWN), p -> p.move(Direction.UP), true);
     }
 
     /**
-     * Check if the move is valid.
+     * Checks if the move is valid.
      *
      * @param onSuccess the on success Direction
      * @param onFail the on fail Direction
@@ -474,7 +472,7 @@ public class GameManager extends Application implements PuzzleGame {
         return toRemove;
     }
     /**
-     * render the canvas game board.
+     * renders the canvas game board.
      */
     public void render() {
         gc.clearRect(0, 0, GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE);
@@ -482,7 +480,7 @@ public class GameManager extends Application implements PuzzleGame {
     }
 
     /**
-     * Level up if user reach the designed score.
+     * Levels up if user reach the designed score.
      */
     @Override
     public void levelUpIfNeed() {
@@ -495,7 +493,7 @@ public class GameManager extends Application implements PuzzleGame {
     }
 
     /**
-     * calculate the score.
+     * calculates the score.
      */
     public void calculateScore() {
         final int scoreBase = 10;
@@ -529,7 +527,7 @@ public class GameManager extends Application implements PuzzleGame {
     }
 
     /**
-     * Spawn the new mino on the board.
+     * Spawns the new mino on the board.
      */
     public void spawn() {
         selected = minoInQueue;
@@ -545,7 +543,7 @@ public class GameManager extends Application implements PuzzleGame {
         }
     }
     /**
-     * Place tag ID to grid.
+     * Places tag ID to grid.
      *
      * @param piece the piece
      */
@@ -554,7 +552,7 @@ public class GameManager extends Application implements PuzzleGame {
     }
 
     /**
-     * Place piece to grid.
+     * Places piece to grid.
      *
      * @param piece the piece
      */
@@ -563,7 +561,7 @@ public class GameManager extends Application implements PuzzleGame {
     }
 
     /**
-     * Remove piece from grid.
+     * Removes piece from grid.
      *
      * @param piece the piece
      */
@@ -571,7 +569,7 @@ public class GameManager extends Application implements PuzzleGame {
         grid[piece.getX()][piece.getY()]--;
     }
     /**
-     * Clear piece from grid.
+     * Clears piece from grid.
      *
      * @param piece the piece
      */
@@ -580,7 +578,7 @@ public class GameManager extends Application implements PuzzleGame {
     }
 
     /**
-     * Check if the piece is off the board.
+     * Checks if the piece is off the board.
      *
      * @param piece the piece
      * @return true if the piece is off the board
@@ -776,7 +774,7 @@ public class GameManager extends Application implements PuzzleGame {
     }
 
     /**
-     * Reset the game.
+     * Resets the game.
      */
     @Override
     public void resetGame() {
@@ -799,7 +797,7 @@ public class GameManager extends Application implements PuzzleGame {
     }
 
     /**
-     * Save the game.
+     * Saves the game.
      */
     @Override
     public void saveGame() {
@@ -834,7 +832,7 @@ public class GameManager extends Application implements PuzzleGame {
         }
     }
     /**
-     * Load the history record based on data at load.txt.
+     * Loads the history record based on data at load.txt.
      */
     private void loadHistoryRecord() {
 
@@ -855,7 +853,7 @@ public class GameManager extends Application implements PuzzleGame {
 
     }
     /**
-     * Load the game based on data at load.txt.
+     * Loads the game based on data at load.txt.
      */
     public void loadGame() {
 
@@ -879,7 +877,7 @@ public class GameManager extends Application implements PuzzleGame {
         }
     }
     /**
-     * Override the start method in Application.
+     * Overrides the start method in Application.
      */
     @Override
     public void start(final Stage stage) throws IOException {
@@ -903,7 +901,7 @@ public class GameManager extends Application implements PuzzleGame {
     }
 
     /**
-     * Drive the program.
+     * Drives the program.
      *
      * @param args the input arguments
      */
@@ -921,5 +919,45 @@ public class GameManager extends Application implements PuzzleGame {
             e.printStackTrace();
         }
         launch();
+    }
+
+    /**
+     * Generates the string representation of the game.
+     *
+     * @return the string representation of the game
+     */
+    @Override
+    public String toString() {
+        return "GameManager{"
+                + "level=" + level
+                + '}';
+    }
+
+    /**
+     * Checks if the game is equal to the given object.
+     *
+     * @param o the given object
+     * @return true if the game is equal to the given object
+     */
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        GameManager that = (GameManager) o;
+        return Objects.equals(level, that.level) && Objects.equals(original, that.original);
+    }
+
+    /**
+     * Returns the hash code of the game.
+     *
+     * @return the hash code of the game
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(level, original);
     }
 }

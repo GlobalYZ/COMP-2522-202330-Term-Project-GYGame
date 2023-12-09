@@ -152,4 +152,9 @@ public final class GameUIHelper {
     public static void updateLv(final Integer lv) {
         levelProperty.set("LV" + lv);
     }
+
+    @Override
+    public String toString() {
+        return "this is a helper class contains static methods and fields!";
+    }
 }

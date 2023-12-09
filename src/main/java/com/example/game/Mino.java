@@ -7,6 +7,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+
 import static com.example.game.GameManager.TILE_SIZE;
 
 /**
@@ -23,7 +25,7 @@ public class Mino implements Serializable {
     private final List<Piece> pieces;
 
     /**
-     * Constructor.
+     * Constructs a Mino object.
      *
      * @param pieces The pieces of the mino.
      */
@@ -35,7 +37,7 @@ public class Mino implements Serializable {
         }
     }
     /**
-     * Get X.
+     * Gets X in the board.
      *
      * @return int x
      */
@@ -44,7 +46,7 @@ public class Mino implements Serializable {
     }
 
     /**
-     * Get Y.
+     * Gets Y in the board.
      *
      * @return int y
      */
@@ -53,7 +55,7 @@ public class Mino implements Serializable {
     }
 
     /**
-     * Get pieces.
+     * Gets pieces.
      *
      * @return List<Piece> pieces of mino
      */
@@ -61,7 +63,7 @@ public class Mino implements Serializable {
         return pieces;
     }
     /**
-     * Move the mino according to dx and dy, both should not be greater than 1.
+     * Moves the mino according to dx and dy, both should not be greater than 1.
      *
      * @param dx int distance of x-axis
      * @param dy int distance of y-axis
@@ -75,7 +77,7 @@ public class Mino implements Serializable {
         });
     }
     /**
-     * Move the mino by assigning the direction.
+     * Moves the mino by assigning the direction.
      *
      * @param direction Direction
      */
@@ -83,7 +85,7 @@ public class Mino implements Serializable {
         move(direction.getX(), direction.getY());
     }
     /**
-     * Draw the mino.
+     * Draws the mino.
      *
      * @param gc GraphicsContext
      */
@@ -95,19 +97,19 @@ public class Mino implements Serializable {
         });
     }
     /**
-     * rotate mino back.
+     * rotates mino back.
      */
     public void rotateBack() {
         pieces.forEach(pc -> pc.setDirection(pc.getDirection().prev()));
     }
     /**
-     * rotate mino.
+     * rotates mino.
      */
     public void rotate() {
         pieces.forEach(pc -> pc.setDirection(pc.getDirection().next()));
     }
     /**
-     * detach the mino from the board.
+     * detaches the mino from the board.
      *
      * @param xOnBoard int x on the board
      * @param yOnBoard int y on the board
@@ -116,7 +118,7 @@ public class Mino implements Serializable {
         pieces.removeIf(pc -> pc.getX() == xOnBoard && pc.getY() == yOnBoard);
     }
     /**
-     * copy the mino.
+     * copies the mino.
      *
      * @return Mino
      */
@@ -126,5 +128,47 @@ public class Mino implements Serializable {
                 .toList()
                 .toArray(new Piece[0]));
     }
+    /**
+     * Generates a string representation of the mino.
+     *
+     * @return String representation of the mino
+     */
+    @Override
+    public String toString() {
+        StringBuilder output = new StringBuilder();
+        output.append("Mino{" + "x=").append(x).append(", y=").append(y);
+        for (Piece piece : pieces) {
+            output.append(", ").append(piece.toString());
+        }
+        output.append("}");
+        return output.toString();
+    }
 
+    /**
+     * Checks if the mino is equal to another object.
+     *
+     * @param o Object
+     * @return boolean
+     */
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Mino mino = (Mino) o;
+        return getX() == mino.getX() && getY() == mino.getY() && Objects.equals(getPieces(), mino.getPieces());
+    }
+
+    /**
+     * Generates a hashcode for the mino.
+     *
+     * @return int hashcode
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(getX(), getY(), getPieces());
+    }
 }

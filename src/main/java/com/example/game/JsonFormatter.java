@@ -185,6 +185,46 @@ public class JsonFormatter implements Serializable {
     public void setScoreNum(final Integer scoreNum) {
         this.scoreNum = scoreNum;
     }
-
-
+    /**
+     * Generate a string representation of the JsonFormatter object.
+     *
+     * @return String representation of the JsonFormatter object
+     */
+    @Override
+    public String toString() {
+        return "JsonFormatter{"
+                + "scoreNum=" + scoreNum
+                + ", comboCount=" + comboCount
+                + ", level=" + level
+                + ", scoreAchieved=" + scoreAchieved
+                + '}';
+    }
+    /**
+     * Compare two JsonFormatter objects.
+     *
+     * @param o The object to be compared
+     * @return boolean whether the two objects are equal
+     */
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        } else if (!(o instanceof JsonFormatter that)) {
+            return false;
+        } else {
+            return scoreNum.equals(that.scoreNum)
+                    && comboCount.equals(that.comboCount)
+                    && level.equals(that.level)
+                    && scoreAchieved.equals(that.scoreAchieved);
+        }
+    }
+    /**
+     * Generate a hashcode for the JsonFormatter object.
+     *
+     * @return int hashcode
+     */
+    @Override
+    public int hashCode() {
+        return scoreNum.hashCode() + comboCount.hashCode() + level.hashCode() + scoreAchieved.hashCode();
+    }
 }

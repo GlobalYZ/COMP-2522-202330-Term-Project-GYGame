@@ -68,4 +68,8 @@ public enum Direction {
         return Direction.values()[nextIndex];
     }
 
+    @Override
+    public String toString() {
+        return "Direction{" + "x=" + x + ", y=" + y + '}';
+    }
 }

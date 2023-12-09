@@ -3,6 +3,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 
 /**
@@ -27,7 +28,7 @@ public class Piece implements Serializable {
 
 
     /**
-     * RecycleType to demonstrate the type of the tag.
+     * Constructs the RecycleType to demonstrate the type of the tag.
      */
     public enum RecycleType implements Serializable {
         Plastic(10),
@@ -42,7 +43,7 @@ public class Piece implements Serializable {
             this.id = id;
         }
         /**
-         * Get the id of the tag.
+         * Gets the id of the tag.
          *
          * @return int id
          */
@@ -52,7 +53,7 @@ public class Piece implements Serializable {
     }
 
     /**
-     * Tag.
+     * Constructs the Tag class to represent the tag of the piece.
      */
     public static final class Tag implements Serializable {
 
@@ -87,7 +88,7 @@ public class Piece implements Serializable {
             imageString = "file:./src/asset/Image/" + type.name() + ".png";
         }
         /**
-         * Get the image string of the tag.
+         * Gets the image string of the tag.
          *
          * @return String imageString
          */
@@ -95,7 +96,7 @@ public class Piece implements Serializable {
             return imageString;
         }
         /**
-         * Get the id of the tag.
+         * Gets the id of the tag.
          *
          * @return int id
          */
@@ -117,7 +118,7 @@ public class Piece implements Serializable {
     }
 
     /**
-     * Get X.
+     * Gets X.
      *
      * @return int x
      */
@@ -126,7 +127,7 @@ public class Piece implements Serializable {
     }
 
     /**
-     * Set X.
+     * Sets X.
      *
      * @param x x
      */
@@ -135,7 +136,7 @@ public class Piece implements Serializable {
     }
 
     /**
-     * Get Y.
+     * Gets Y.
      *
      * @return int y
      */
@@ -144,7 +145,7 @@ public class Piece implements Serializable {
     }
 
     /**
-     * Set Y.
+     * Sets Y.
      *
      * @param y y
      */
@@ -153,7 +154,7 @@ public class Piece implements Serializable {
     }
 
     /**
-     * Get the tag of the piece.
+     * Gets the tag of the piece.
      *
      * @return Tag tag
      */
@@ -163,7 +164,7 @@ public class Piece implements Serializable {
 
 
     /**
-     * Set the parent of the piece.
+     * Sets the parent of the piece.
      *
      * @param parent The parent of the piece.
      */
@@ -174,7 +175,7 @@ public class Piece implements Serializable {
     }
 
     /**
-     * Set the direction of the piece.
+     * Sets the direction of the piece.
      *
      * @param direction The direction of the piece.
      */
@@ -185,7 +186,7 @@ public class Piece implements Serializable {
     }
 
     /**
-     * Get the direction of the piece.
+     * Gets the direction of the piece.
      *
      * @return Direction direction
      */
@@ -199,5 +200,44 @@ public class Piece implements Serializable {
      */
     public Piece copy() {
         return new Piece(distance, direction);
+    }
+
+    /**
+     * Returns the string representation of the piece.
+     *
+     * @return String representation of the piece.
+     */
+    @Override
+    public String toString() {
+        return "Piece{"
+                + "x=" + x + ", y=" + y + '}';
+    }
+
+    /**
+     * Returns true if the piece is equal to the passed object.
+     *
+     * @param o The object to be compared.
+     * @return True if the piece is equal to the passed object.
+     */
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Piece piece = (Piece) o;
+        return getX() == piece.getX() && getY() == piece.getY() && Objects.equals(getTag(), piece.getTag());
+    }
+
+    /**
+     * Returns the hashcode of the piece.
+     *
+     * @return The hashcode of the piece.
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(getTag(), getX(), getY());
     }
 }
