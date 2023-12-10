@@ -135,8 +135,6 @@ public class GameManager extends Application implements PuzzleGame {
                 new Piece(1, Direction.LEFT),
                 new Piece(1, Direction.RIGHT),
                 new Piece(1, Direction.DOWN)));
-        // other two Minos needs a list of Direction for the position
-        // Will adjust the code after testing the basic minos
     }
 
     /**
@@ -907,7 +905,7 @@ public class GameManager extends Application implements PuzzleGame {
      * @param args the input arguments
      */
     public static void main(final String[] args) {
-        String musicFile = "src/asset/sound/bgm.wav"; // 相对路径，假设音频文件与 Java 源代码在同一目录下
+        String musicFile = "src/asset/sound/bgm.wav";
         try {
             File audioFile = new File(musicFile);
             AudioInputStream audioStream = AudioSystem.getAudioInputStream(audioFile);
