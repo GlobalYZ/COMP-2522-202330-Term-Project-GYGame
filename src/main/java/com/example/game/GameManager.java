@@ -783,6 +783,7 @@ public class GameManager extends Application implements PuzzleGame {
                 grid[x][y] = 0;
             }
         }
+        timeThreshold = 1;
         scoreNum = 0;
         GameUIHelper.updateCurrentScore(scoreNum);
         gc.clearRect(0, 0, GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE);
