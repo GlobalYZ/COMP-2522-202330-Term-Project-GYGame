@@ -440,7 +440,6 @@ public class GameManager extends Application implements PuzzleGame {
             }
         }
     }
-
     private boolean[][] checkMatches() {  // return a boolean matrix to represent the matches to remove
         boolean[][] toRemove = new boolean[GRID_WIDTH][GRID_HEIGHT];
         int tagID;
