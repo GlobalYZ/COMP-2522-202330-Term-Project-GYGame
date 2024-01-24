@@ -416,6 +416,7 @@ public class GameManager extends Application implements PuzzleGame {
             }
         }
     }
+
     private void checkForHorizontalMatch(final boolean[][] toRemove) {
         for (int y = 0; y < GRID_HEIGHT; y++) {
             for (int x = 0; x < GRID_WIDTH - 2; x++) {
